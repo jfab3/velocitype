@@ -1,0 +1,30 @@
+body {
+  background-color: rgba(251, 251, 246, 1);
+}
+
+#root {
+  margin: 0 auto;
+}
+
+/*
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+  background-color: rgba(251, 251, 246, 1);
+}
+*/
+
+#container {
+  display: flex;
+  margin: 0 auto;
+  width: 50vw;
+  min-height: 20vh;
+  background-color: rgba(248, 245, 233, 1);
+}
+
+.ql-container {
+  width: inherit;
+  height: inherit;
+}
