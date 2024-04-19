@@ -1,5 +1,6 @@
 body {
   background-color: rgba(251, 251, 246, 1);
+  padding: 30px;
 }
 
 #root {
@@ -21,10 +22,34 @@ body {
   margin: 0 auto;
   width: 50vw;
   min-height: 20vh;
+  border-radius: 5px;
   background-color: rgba(248, 245, 233, 1);
 }
 
-.ql-container {
-  width: inherit;
-  height: inherit;
+#alignment-button-container {
+  display: flex;
+  justify-items: center;
+}
+
+.alignment-button {
+  display: flex;
+  height: 50px;
+  flex: 1 1 0px;
+  margin: 10px;
+  border-radius: 5px;
+  align-content: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background-color: lightblue;
+}
+
+.content-editable-div {
+  width: 100%;
+  height: auto;
+  padding: 5px;
+  text-align: center;
+}
+
+.text-span {
+  white-space: pre-wrap;
 }
