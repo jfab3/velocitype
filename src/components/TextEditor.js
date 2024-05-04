@@ -17,10 +17,10 @@ class TextEditor {
         this._isTimerRunning = false;
 
         this._range = document.createRange();
-        this._rangeInit = false;
         this._selection = window.getSelection();
 
         div.appendChild(this._contentEditableDiv);
+        this._contentEditableDiv.focus();
     }
 
     setTextAlignment (alignment) {
@@ -75,44 +75,49 @@ class TextEditor {
         const selectedNode = document.getSelection().anchorNode;
         
         if (selectedNode === this._contentEditableDiv) { // content-editable selected
-            if (this._rangeInit) {
+            const childrenNodes = this._contentEditableDiv.children;
+            const selectedNodeIdx = childrenNodes.length - 1;
+
+            if (childrenNodes.length === 0) {
+                selectedNode.appendChild(span);
+                this._range.setStartAfter(this._contentEditableDiv.children[0], 0);
                 this._range.collapse(true);
-                this._range.insertNode(span);
-                this._range.collapse();
-    
+
                 this._selection.removeAllRanges();
                 this._selection.addRange(this._range);
-            } else {
-                selectedNode.appendChild(span);
+                return;
             }
+
+            this._range.collapse(true);
+            this._range.insertNode(span);
+            this._range.collapse();
+
+            this._selection.removeAllRanges();
+            this._selection.addRange(this._range);
         } else if (selectedNode.parentNode === this._contentEditableDiv) { // text-span selected
-            const selectedNodeIdx = [...selectedNode.parentNode.children].indexOf(selectedNode.previousSibling);
             const childrenNodes = this._contentEditableDiv.children;
+            const selectedNodeIdx = [...selectedNode.parentNode.children].indexOf(selectedNode.previousSibling);
             
             this._range.setStartAfter(childrenNodes[selectedNodeIdx], 0);
             this._range.collapse(true);
             this._range.insertNode(span);
             this._range.setStartAfter(childrenNodes[selectedNodeIdx + 1], 0);
             this._range.collapse(true);
-            this._rangeInit = true;
 
             this._selection.removeAllRanges();
             this._selection.addRange(this._range);
         } else if (selectedNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
-            const selectedNodeIdx = [...selectedNode.parentNode.parentNode.children].indexOf(selectedNode.parentNode);
             const childrenNodes = this._contentEditableDiv.children;
+            const selectedNodeIdx = [...selectedNode.parentNode.parentNode.children].indexOf(selectedNode.parentNode);
             
             this._range.setStartAfter(childrenNodes[selectedNodeIdx], 0);
             this._range.collapse(true);
             this._range.insertNode(span);
             this._range.setStartAfter(childrenNodes[selectedNodeIdx + 1], 0);
             this._range.collapse(true);
-            this._rangeInit = true;
 
             this._selection.removeAllRanges();
             this._selection.addRange(this._range);
-        } else {
-            return span.outerHTML;
         }
     }
 

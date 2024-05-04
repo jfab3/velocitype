@@ -1,0 +1,183 @@
+:root {
+  --mainColor: rgba(251, 251, 246, 1);
+  --secondaryColor: rgba(248, 245, 233, 1);
+  --textColor: #27373F;
+  --textColor-secondary: #578390;
+  --borderColor: #8B999F;
+}
+
+body {
+  background-color: var(--mainColor);
+}
+
+/* HOME PAGE */
+
+#home-page-container {
+  display: flex;
+  flex-direction: column;
+  margin: 0 auto;
+  width: 50vw;
+}
+
+#content-editable-container {
+  display: flex;
+  min-height: 20vh;
+  border-radius: 5px;
+  background-color: var(--secondaryColor);
+}
+
+#alignment-button-container {
+  display: flex;
+  justify-items: center;
+}
+
+.alignment-button {
+  display: flex;
+  height: 50px;
+  flex: 1 1 0px;
+  margin: 10px;
+  border-radius: 5px;
+  align-content: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  background-color: lightblue;
+}
+
+.content-editable-div {
+  width: 100%;
+  height: auto;
+  padding: 5px;
+  text-align: center;
+  outline-color: var(--borderColor);
+}
+
+.text-span {
+  white-space: pre-wrap;
+}
+
+/* NAVBAR */
+
+#navbar {
+  position: sticky;
+  top: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: 40px;
+  color: var(--textColor);
+  border-bottom: 1px solid var(--borderColor);
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+#navbar .title, 
+#navbar .page-links-container {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+#navbar .title {
+  grid-column: 2;
+  justify-content: center;
+}
+
+#navbar .title .titleLetter {
+  color: var(--textColor);
+}
+
+#navbar .page-links-container {
+  grid-column: 3;
+  justify-content: flex-end;
+}
+
+#navbar a {
+  margin: 0 1rem;
+  font-size: large;
+  text-decoration: none;
+  color: var(--textColor);
+}
+
+#navbar a:hover {
+  color: gray;
+}
+
+/* TITLE */
+
+#navbar .title span.titleLetter {
+  transition: font-size 1s;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(1),
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(10) {
+  font-size: 18px;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(2),
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(9) {
+  font-size: 22px;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(3),
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(8) {
+  font-size: 26px;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(4) {
+  font-size: 32px;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(5) {
+  font-size: 38px;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(6) {
+  font-size: 32px;
+}
+
+#navbar .title.title-style-1 span.titleLetter:nth-of-type(7) {
+  font-size: 29px;
+}
+
+#navbar .title.title-style-2 span.titleLetter:nth-of-type(even) {
+  font-size: 20px;
+}
+
+#navbar .title.title-style-2 span.titleLetter:nth-of-type(odd) {
+  font-size: 30px;
+}
+
+#navbar .title.title-style-3 span.titleLetter:nth-of-type(3n) {
+  font-size: 12px;
+}
+
+#navbar .title.title-style-3 span.titleLetter:nth-of-type(3n + 1) {
+  font-size: 24px;
+}
+
+#navbar .title.title-style-4 span.titleLetter:nth-of-type(4n) {
+  font-size: 25px;
+}
+
+#navbar .title.title-style-4 span.titleLetter:nth-of-type(4n + 1) {
+  font-size: 21px;
+}
+
+#navbar .title.title-style-4 span.titleLetter:nth-of-type(4n + 2) {
+  font-size: 18px;
+}
+
+#navbar .title.title-style-5 span.titleLetter:nth-of-type(5n - 2) {
+  font-size: 20px;
+}
+
+#navbar .title.title-style-5 span.titleLetter:nth-of-type(5n - 1) {
+  font-size: 28px;
+}
+
+#navbar .title.title-style-5 span.titleLetter:nth-of-type(5n) {
+  font-size: 38px;
+}
+
+#navbar .title.title-style-5 span.titleLetter:nth-of-type(1) {
+  font-size: 30px;
+}

@@ -1,29 +1,19 @@
-import { useCallback, useState, useRef, useEffect } from 'react'
-import TextEditor from './TextEditor'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import NavBar from './components/NavBar';
+import HomePage from './pages/HomePage';
+import AboutPage from './pages/AboutPage';
+import DevelopmentDetailsPage from './pages/DevelopmentDetailsPage';
 
 function App() {
-  const [textAlignment, setTextAlignment] = useState(0)
-  const textEditor = useRef()
-
-  const wrapperRef = useCallback((wrapper) => {
-    if (wrapper == null) { return; }
-    wrapper.innerHTML = "";
-    textEditor.current = new TextEditor(wrapper);
-  }, []);
-
-  useEffect(() => {
-    textEditor.current.setTextAlignment(textAlignment);
-  }, [textAlignment]);
-
   return (
-    <>
-      <div id="container" ref={wrapperRef}></div>
-      <div id="alignment-button-container">
-        <button id="align-left" className="alignment-button" onClick={() => setTextAlignment("left")}>Align Left</button>
-        <button id="align-center" className="alignment-button" onClick={() => setTextAlignment("center")}>Align Center</button>
-        <button id="align-right" className="alignment-button" onClick={() => setTextAlignment("right")}>Align Right</button>
-      </div>
-    </>
+    <BrowserRouter>
+      <NavBar />
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/about" element={<AboutPage />} />
+        <Route path="/development" element={<DevelopmentDetailsPage />} />
+      </Routes>
+    </BrowserRouter>
   )
 }
 
