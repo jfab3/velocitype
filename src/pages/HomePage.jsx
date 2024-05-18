@@ -18,6 +18,9 @@ function HomePage() {
     return (
         <>
         <div id="home-page-container">
+            <div id="basic-directions-container">
+                <div>Velocitype styles your text based on the speed at which you type.</div>
+            </div>
             <div id="content-editable-container" ref={wrapperRef}></div>
             <div id="alignment-button-container">
                 <button id="align-left" className="alignment-button" onClick={() => setTextAlignment("left")}>Align Left</button>

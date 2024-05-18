@@ -1,5 +1,23 @@
+@font-face {
+  font-family: "bebaskai";
+  src:
+    url("../assets/fonts/Bebas-Kai/fonts/woff20cffbased/BebasKai.woff2") format("woff2"),
+    url("../assets/fonts/Bebas-Kai/fonts/woff-cffbased/BebasKai.woff") format("woff");
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'source_sans_prolight';
+  src: url('../assets/fonts/Source-Sans-Pro/sourcesanspro-light-webfont.woff2') format('woff2'),
+       url('../assets/fonts/Source-Sans-Pro/sourcesanspro-light-webfont.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+
+}
+
 :root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  font-family: "source_sans_prolight", serif;
   line-height: 1.5;
   font-weight: 400;
 

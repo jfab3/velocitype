@@ -41,22 +41,23 @@ class TextEditor {
 
     handleKeyDown (e) {
         if (e.inputType === "insertFromPaste") {
-            // e.stopPropagation();
-            // e.preventDefault();
+            e.stopPropagation();
+            e.preventDefault();
             return;
         }
 
+        this._numTextChanges += 1;
+        const speed = this._calculateSpeed();
+        const fontSize = `${speed * 12 + 8}px`;
         const eventKey = e.data;
         // not a good way to check, just for the time being...
         if (eventKey !== null) {
             e.stopPropagation();
             e.preventDefault();
-            this._numTextChanges += 1;
-            const speed = this._calculateSpeed();
             
             const span = document.createElement("span");
             span.innerText = eventKey;
-            span.style.fontSize = `${speed * 12 + 8}px`;
+            span.style.fontSize = fontSize;
             span.classList.add("text-span");
 
             this._setNewText(span);
@@ -64,23 +65,47 @@ class TextEditor {
                 this.startTimer();
             }
         } else if (e.inputType === "insertParagraph") {
+            return
+
             e.stopPropagation();
             e.preventDefault();
-            const br = document.createElement("br");
-            this._setNewText(br);
+            
+            const newline = document.createElement("div");
+            newline.innerHTML = " ";
+            newline.style.fontSize = fontSize;
+            newline.classList.add("text-span");
+            
+            this._setNewText(newline);
+            if (!this._isTimerRunning) {
+                this.startTimer();
+            }
         } 
     }
 
-    _setNewText (span) {
-        const selectedNode = document.getSelection().anchorNode;
+    _setNewText (newTexElem) {
+        /**
+         * DOM Structure:
+         *      content-editable
+         *          section divs
+         *              text-spans
+         *                  text
+         */
+
+        const anchorNode = document.getSelection().anchorNode;
+        const anchorNodeOffset = document.getSelection().anchorOffset;
+
+        const focusNode = document.getSelection().focusNode;
+        const focusNodeOffset = document.getSelection().focusOffset;
         
-        if (selectedNode === this._contentEditableDiv) { // content-editable selected
+        if (anchorNode === this._contentEditableDiv) { // content-editable selected
+            console.log("Content Editable Selected");
             const childrenNodes = this._contentEditableDiv.children;
-            const selectedNodeIdx = childrenNodes.length - 1;
 
             if (childrenNodes.length === 0) {
-                selectedNode.appendChild(span);
-                this._range.setStartAfter(this._contentEditableDiv.children[0], 0);
+                const newSection = document.createElement("div");
+                newSection.appendChild(newTexElem);
+                this._contentEditableDiv.appendChild(newSection);
+                this._range.setStartAfter(newSection.children[0], 0);
                 this._range.collapse(true);
 
                 this._selection.removeAllRanges();
@@ -88,32 +113,79 @@ class TextEditor {
                 return;
             }
 
+            // Need to delete stale <BR> and <DIV><BR><DIV> that are sometimes left behind...
+
             this._range.collapse(true);
-            this._range.insertNode(span);
+            this._range.insertNode(newTexElem);
             this._range.collapse();
 
             this._selection.removeAllRanges();
             this._selection.addRange(this._range);
-        } else if (selectedNode.parentNode === this._contentEditableDiv) { // text-span selected
-            const childrenNodes = this._contentEditableDiv.children;
-            const selectedNodeIdx = [...selectedNode.parentNode.children].indexOf(selectedNode.previousSibling);
-            
-            this._range.setStartAfter(childrenNodes[selectedNodeIdx], 0);
+        } else if (anchorNode.parentNode === this._contentEditableDiv) { // section div selected
+            console.log("Section Div Selected");
             this._range.collapse(true);
-            this._range.insertNode(span);
-            this._range.setStartAfter(childrenNodes[selectedNodeIdx + 1], 0);
+            this._range.insertNode(newTexElem);
+            this._range.collapse();
+
+            this._selection.removeAllRanges();
+            this._selection.addRange(this._range);
+        } else if (anchorNode.parentNode.parentNode === this._contentEditableDiv) { // text-span selected
+            console.log("Text Span Selected");
+
+            // Find a better way to check this
+            // Replace <br> in new paragraphs
+            if (anchorNode.children && anchorNode.children[0].nodeName === 'BR') {
+                this._range.setStartBefore(anchorNode);
+                this._range.setEndAfter(anchorNode);
+                this._range.deleteContents();
+                this._range.insertNode(newTexElem);
+                this._range.setStartAfter(newTexElem);
+                this._range.collapse(true);
+
+                this._selection.removeAllRanges();
+                this._selection.addRange(this._range);
+                return;
+            }
+
+            const sectionDivNodes = this._contentEditableDiv.children;
+
+            const selectedSectionIdx = [...this._contentEditableDiv.children].indexOf(anchorNode.parentNode);
+            const selectedSection = sectionDivNodes[selectedSectionIdx];
+            const textSpanNodesInSection = selectedSection.children;
+            const textSpanNodeIdx = [...selectedSection.children].indexOf(anchorNode);
+            
+            this._range.setStartAfter(textSpanNodesInSection[textSpanNodeIdx], 0);
+            this._range.collapse(true);
+            this._range.insertNode(newTexElem);
+            this._range.setStartAfter(textSpanNodesInSection[textSpanNodeIdx + 1], 0);
             this._range.collapse(true);
 
             this._selection.removeAllRanges();
             this._selection.addRange(this._range);
-        } else if (selectedNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
-            const childrenNodes = this._contentEditableDiv.children;
-            const selectedNodeIdx = [...selectedNode.parentNode.parentNode.children].indexOf(selectedNode.parentNode);
+        } else if (anchorNode.parentNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
+            console.log("Text Selected");
+
+            const sectionDivNodes = this._contentEditableDiv.children;
             
-            this._range.setStartAfter(childrenNodes[selectedNodeIdx], 0);
-            this._range.collapse(true);
-            this._range.insertNode(span);
-            this._range.setStartAfter(childrenNodes[selectedNodeIdx + 1], 0);
+
+            // Need to check if anchorNode or focusNode comes first in the editor...
+            const anchorNodeSectionIdx = [...this._contentEditableDiv.children].indexOf(anchorNode.parentNode.parentNode);
+            const anchorNodeSection = sectionDivNodes[anchorNodeSectionIdx];
+            const anchorNodeTextSpanIdx = [...anchorNodeSection.children].indexOf(anchorNode.parentNode);
+
+            const focusNodeSectionIdx = [...this._contentEditableDiv.children].indexOf(focusNode.parentNode.parentNode);
+            const focusNodeSection = sectionDivNodes[focusNodeSectionIdx];
+            const focusNodeTextSpanIdx = [...focusNodeSection.children].indexOf(focusNode.parentNode);
+            
+            this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset);
+            this._range.insertNode(newTexElem);
+            const anchorNodeShiftAfterInsert = 1;
+            const focusNodeShiftAfterInsert = (anchorNodeSectionIdx === focusNodeSectionIdx) ? 1 : 0; 
+
+            this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset + anchorNodeShiftAfterInsert);
+            this._range.setEnd(focusNodeSection, focusNodeTextSpanIdx + focusNodeOffset + focusNodeShiftAfterInsert);
+            this._range.deleteContents();
+            this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset + 1);
             this._range.collapse(true);
 
             this._selection.removeAllRanges();
