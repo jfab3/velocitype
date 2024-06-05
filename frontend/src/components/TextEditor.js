@@ -33,7 +33,7 @@ class TextEditor {
         // Stop data from being pasted
         e.stopPropagation();
         e.preventDefault();
-      
+
         // Get pasted data from clipboard API
         clipboardData = e.clipboardData || window.clipboardData;
         pastedData = clipboardData.getData('Text');
