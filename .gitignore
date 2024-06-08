@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 /.vite/*
+mongodb-data
 dist
 dist-ssr
 *.local

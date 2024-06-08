@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { v4 as uuidV4 } from "uuid";
 import NavBar from './components/NavBar';
 import FooterBar from './components/FooterBar';
 import HomePage from './pages/HomePage';
@@ -10,7 +11,8 @@ function App() {
     <BrowserRouter>
       <NavBar />
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Navigate to={`/documents/${uuidV4()}`} />} />
+        <Route path="/documents/:id" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/development" element={<DevelopmentDetailsPage />} />
       </Routes>
