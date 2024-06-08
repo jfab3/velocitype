@@ -12,7 +12,7 @@ function App() {
       <NavBar />
       <Routes>
         <Route path="/" element={<Navigate to={`/documents/${uuidV4()}`} />} />
-        <Route path="/documents/:id" element={<HomePage />} />
+        <Route path="/documents/:docId" element={<HomePage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/development" element={<DevelopmentDetailsPage />} />
       </Routes>

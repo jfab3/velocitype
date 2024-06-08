@@ -4,20 +4,9 @@ import { Link } from "react-router-dom";
 const NavBar = () => {
     const titleTextRef = useRef();
 
-    function setTitleTextStyle () {
-        const titleStyles = ['title-style-1', 'title-style-2', 'title-style-3', 'title-style-4', 'title-style-5'];
-        for (const style of titleStyles) {
-            titleTextRef.current.classList.remove(style);
-        }
-        const randStyle1 = titleStyles[Math.floor(Math.random() * titleStyles.length)];
-        const randStyle2 = titleStyles[Math.floor(Math.random() * titleStyles.length)];
-        titleTextRef.current.classList.add(randStyle1);
-        titleTextRef.current.classList.add(randStyle2);
-    }
-
     return (
         <header id="navbar">
-            <span ref={titleTextRef} className="title title-style-1" onClick={setTitleTextStyle}>
+            <span ref={titleTextRef} className="title">
                 <Link to="/">
                     <span className="titleLetter">V</span>
                     <span className="titleLetter">E</span>

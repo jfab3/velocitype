@@ -1,13 +1,17 @@
+import axios from 'axios';
+
 class TextEditor {
 
-    constructor (div) {        
+    constructor (div, docId) {        
+        this._docId = docId;
+
         this._contentEditableDiv = document.createElement('div');
         this._contentEditableDiv.contentEditable = true;
         this._contentEditableDiv.spellcheck = false;
         this._contentEditableDiv.className = "content-editable-div";
         
         this._contentEditableDiv.onbeforeinput = this.handleKeyDown.bind(this);
-        this._contentEditableDiv.onblur = this.stopTimer.bind(this);
+        this._contentEditableDiv.onblur = this.handleOnBlur.bind(this);
         // this._contentEditableDiv.onpaste = this.catchPaste.bind(this);
 
         this._timerId;
@@ -23,8 +27,30 @@ class TextEditor {
         this._contentEditableDiv.focus();
     }
 
+    async loadHtmlFromServer () {
+        const response = await axios.get(`/api/documents/${this._docId}`);
+        const docInfo = response.data;
+        if (!docInfo) {
+            return;
+        }
+
+        this._contentEditableDiv.innerHTML = docInfo.html;
+    }
+
+    async saveHtmlToServer () {
+        await axios.put(`/api/documents/${this._docId}/save`, {
+            docId: this._docId,
+            html: this._contentEditableDiv.innerHTML
+        });
+    }
+
     setTextAlignment (alignment) {
         this._contentEditableDiv.style.textAlign = alignment;
+    }
+
+    handleOnBlur () {
+        this.saveHtmlToServer();
+        this.stopTimer();
     }
 
     catchPaste (e) {

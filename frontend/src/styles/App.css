@@ -4,6 +4,7 @@
   --secondaryColor: rgba(248, 245, 233, 1);
   --secondaryColor-darker: rgba(237, 232, 210, 1);
   --borderColor: #8B999F;
+  --boxShadowColor: #778899;
   --textColor: #27373F;
   --textColor-secondary: #578390;
 }
@@ -50,16 +51,19 @@ body {
 
 .alignment-button {
   display: flex;
-  height: 50px;
+  height: 25px;
   flex: 1 1 0px;
   margin: 10px;
   border-radius: 5px;
+  border: none;
+  box-shadow: 0px 0px 3px var(--boxShadowColor);
   align-content: center;
   justify-content: center;
   flex-wrap: wrap;
   font-family: 'bebaskai';
   letter-spacing: 2px;
-  background-color: lightblue;
+  cursor: pointer;
+  background-color: var(--secondaryColor);
 }
 
 .content-editable-div {
@@ -70,7 +74,7 @@ body {
   text-align: center;
   border-radius: 3px;
   outline: none;
-  box-shadow: 0px 0px 3px lightslategray;
+  box-shadow: 0px 0px 3px var(--boxShadowColor);
   background-color: var(--secondaryColor);
 
   /* white-space: pre-wrap; */
@@ -99,7 +103,7 @@ body {
   overflow: hidden;
   padding: 20px;
   border-radius: 3px;
-  box-shadow: 0px 0px 3px lightslategray;
+  box-shadow: 0px 0px 3px var(--boxShadowColor);
   background-color: var(--secondaryColor);
 }
 
@@ -143,7 +147,7 @@ body {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: 50px;
-  box-shadow: 0px 1px 3px lightslategray;
+  box-shadow: 0px 1px 3px var(--boxShadowColor);
   align-items: center;
   margin-bottom: 100px;
   background-color: var(--mainColor);
@@ -159,7 +163,7 @@ body {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 
   background-color: var(--secondaryColor);
-  box-shadow: 0px -1px 3px lightslategray;
+  box-shadow: 0px -1px 3px var(--boxShadowColor);
 
   cursor: default;
 }
@@ -208,80 +212,35 @@ body {
 
 #navbar .title span.titleLetter {
   color: var(--textColor);
-  transition: font-size 1s;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(1),
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(10) {
+#navbar .title span.titleLetter:nth-of-type(1),
+#navbar .title span.titleLetter:nth-of-type(10) {
   font-size: 18px;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(2),
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(9) {
+#navbar .title span.titleLetter:nth-of-type(2),
+#navbar .title span.titleLetter:nth-of-type(9) {
   font-size: 22px;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(3),
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(8) {
+#navbar .title span.titleLetter:nth-of-type(3),
+#navbar .title span.titleLetter:nth-of-type(8) {
   font-size: 26px;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(4) {
+#navbar .title span.titleLetter:nth-of-type(4) {
   font-size: 32px;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(5) {
+#navbar .title span.titleLetter:nth-of-type(5) {
   font-size: 38px;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(6) {
+#navbar .title span.titleLetter:nth-of-type(6) {
   font-size: 32px;
 }
 
-#navbar .title.title-style-1 span.titleLetter:nth-of-type(7) {
+#navbar .title span.titleLetter:nth-of-type(7) {
   font-size: 29px;
-}
-
-#navbar .title.title-style-2 span.titleLetter:nth-of-type(even) {
-  font-size: 20px;
-}
-
-#navbar .title.title-style-2 span.titleLetter:nth-of-type(odd) {
-  font-size: 30px;
-}
-
-#navbar .title.title-style-3 span.titleLetter:nth-of-type(3n) {
-  font-size: 12px;
-}
-
-#navbar .title.title-style-3 span.titleLetter:nth-of-type(3n + 1) {
-  font-size: 24px;
-}
-
-#navbar .title.title-style-4 span.titleLetter:nth-of-type(4n) {
-  font-size: 25px;
-}
-
-#navbar .title.title-style-4 span.titleLetter:nth-of-type(4n + 1) {
-  font-size: 21px;
-}
-
-#navbar .title.title-style-4 span.titleLetter:nth-of-type(4n + 2) {
-  font-size: 18px;
-}
-
-#navbar .title.title-style-5 span.titleLetter:nth-of-type(5n - 2) {
-  font-size: 20px;
-}
-
-#navbar .title.title-style-5 span.titleLetter:nth-of-type(5n - 1) {
-  font-size: 28px;
-}
-
-#navbar .title.title-style-5 span.titleLetter:nth-of-type(5n) {
-  font-size: 38px;
-}
-
-#navbar .title.title-style-5 span.titleLetter:nth-of-type(1) {
-  font-size: 30px;
 }

@@ -5,15 +5,10 @@ const app = express();
 app.use(express.json());
 
 app.get('/api/documents/:docId', async (req, res) => {
-    const { docId } = req.params;
-
+    const { docId } = req.params;    
     const document = await db.collection('documents').findOne({ docId });
-    if (document) {
-        res.json(document);
-    } else {
-        res.sendStatus(404);
-    }
     
+    res.json(document);
 });
 
 app.put('/api/documents/:docId/save', async (req, res) => {

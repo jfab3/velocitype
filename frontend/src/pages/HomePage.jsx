@@ -1,14 +1,17 @@
 import { useCallback, useState, useRef, useEffect } from 'react'
+import { useParams } from 'react-router-dom';
 import TextEditor from '../components/TextEditor';
 
 function HomePage() {
     const [textAlignment, setTextAlignment] = useState("center");
     const textEditor = useRef()
+    const { docId } = useParams();
 
-    const wrapperRef = useCallback((wrapper) => {
+    const wrapperRef = useCallback(async (wrapper) => {
         if (wrapper == null) { return; }
         wrapper.innerHTML = "";
-        textEditor.current = new TextEditor(wrapper);
+        textEditor.current = new TextEditor(wrapper, docId);
+        await textEditor.current.loadHtmlFromServer();
     }, []);
 
     useEffect(() => {
