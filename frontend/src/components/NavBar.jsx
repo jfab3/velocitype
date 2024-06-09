@@ -1,8 +1,25 @@
 import { useRef } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signOut } from "firebase/auth";
+import useUser from "../hooks/useUser";
 
 const NavBar = () => {
+    const { user, isLoading } = useUser();
     const titleTextRef = useRef();
+    const navigate = useNavigate();
+
+    const navigateToLogIn = () => {
+        navigate('/signin');
+    }
+
+    const logOut = () => {
+        signOut(getAuth()).then(() => {
+            // Sign-out successful.
+            navigate('/');
+        }).catch((error) => {
+            // An error happened.
+        });
+    }
 
     return (
         <header id="navbar">
@@ -23,9 +40,15 @@ const NavBar = () => {
             
             <nav className="page-links-container">
                 <Link to="/">Home</Link>
-                <Link to="/about">About</Link>
                 <Link to="/development">Development</Link>
+                <Link to="/about">About</Link>
             </nav >
+
+            <span className="sign-in-link-container">
+                {user 
+                    ? <button className="navbar-button" onClick={logOut}>Sign Out</button>
+                    : <button className="navbar-button" onClick={navigateToLogIn}>Sign In</button>}
+            </span>
         </header>
     )
 }
