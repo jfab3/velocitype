@@ -1,8 +1,10 @@
 import { useCallback, useState, useRef, useEffect } from 'react'
 import { useParams } from 'react-router-dom';
+import useUser from '../hooks/useUser';
 import TextEditor from '../components/TextEditor';
 
 function HomePage() {
+    const { user, isLoading } = useUser();
     const [textAlignment, setTextAlignment] = useState("center");
     const textEditor = useRef()
     const { docId } = useParams();
@@ -10,13 +12,22 @@ function HomePage() {
     const wrapperRef = useCallback(async (wrapper) => {
         if (wrapper == null) { return; }
         wrapper.innerHTML = "";
-        textEditor.current = new TextEditor(wrapper, docId);
+        textEditor.current = new TextEditor(wrapper, docId, user, isLoading);
         await textEditor.current.loadHtmlFromServer();
     }, []);
 
     useEffect(() => {
         textEditor.current.setTextAlignment(textAlignment);
     }, [textAlignment]);
+
+    useEffect(() => {
+        const loadHtmlForUser = async () => {
+            textEditor.current.setUser(user);
+            textEditor.current.setIsLoading(isLoading);
+            await textEditor.current.loadHtmlFromServer();
+        }
+        loadHtmlForUser();
+    }, [user, isLoading]);
 
     return (
         <>

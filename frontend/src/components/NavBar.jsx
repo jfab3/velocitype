@@ -46,8 +46,8 @@ const NavBar = () => {
 
             <span className="sign-in-link-container">
                 {user 
-                    ? <button className="navbar-button" onClick={logOut}>Sign Out</button>
-                    : <button className="navbar-button" onClick={navigateToLogIn}>Sign In</button>}
+                    ? !isLoading && <button className="navbar-button" onClick={logOut}>Sign Out</button>
+                    : !isLoading && <button className="navbar-button" onClick={navigateToLogIn}>Sign In</button>}
             </span>
         </header>
     )

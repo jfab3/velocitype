@@ -2,8 +2,10 @@ import axios from 'axios';
 
 class TextEditor {
 
-    constructor (div, docId) {        
+    constructor (div, docId, user, isLoading) {        
         this._docId = docId;
+        this._user = user;
+        this._isLoading = isLoading;
 
         this._contentEditableDiv = document.createElement('div');
         this._contentEditableDiv.contentEditable = true;
@@ -27,8 +29,18 @@ class TextEditor {
         this._contentEditableDiv.focus();
     }
 
+    setUser (user) {
+        this._user = user;
+    }
+
+    setIsLoading (isLoading) {
+        this._isLoading = isLoading;
+    }
+
     async loadHtmlFromServer () {
-        const response = await axios.get(`/api/documents/${this._docId}`);
+        const token = this._user && await this._user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
+        const response = await axios.get(`/api/documents/${this._docId}`, { headers });
         const docInfo = response.data;
         if (!docInfo) {
             return;
@@ -38,9 +50,13 @@ class TextEditor {
     }
 
     async saveHtmlToServer () {
+        const token = this._user && await this._user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
         await axios.put(`/api/documents/${this._docId}/save`, {
             docId: this._docId,
             html: this._contentEditableDiv.innerHTML
+        }, { 
+            headers
         });
     }
 

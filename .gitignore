@@ -8,8 +8,9 @@ pnpm-debug.log*
 lerna-debug.log*
 
 node_modules
-/.vite/*
+.vite/*
 mongodb-data
+credentials.json
 dist
 dist-ssr
 *.local

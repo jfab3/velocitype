@@ -8,6 +8,7 @@
   --textColor: #27373F;
   --textColor-secondary: #578390;
   --textColor-error: #aa452a;
+  --textColor-success: #113d28;
 }
 
 body {
@@ -69,7 +70,7 @@ body {
   justify-items: center;
 }
 
-.alignment-button, .continue-button, .navbar-button {
+.alignment-button, .continue-button, .home-button, .navbar-button {
   display: flex;
   border-radius: 5px;
   border: none;
@@ -89,11 +90,15 @@ body {
   margin: 10px;
 }
 
-.continue-button {
+.continue-button, .home-button {
   background-color: var(--mainColor-greener);
   flex: 0 0 35px;
   padding: 5px 20px;
   margin: 0;
+}
+
+.home-button {
+  align-self: stretch;
 }
 
 .navbar-button {
@@ -106,7 +111,7 @@ body {
   font-size: 18px;
 }
 
-.alignment-button:hover, .continue-button:hover, .navbar-button:hover {
+.alignment-button:hover, .continue-button:hover, .home-button:hover, .navbar-button:hover {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
 }
 
@@ -192,7 +197,13 @@ body {
 }
 
 #login-page-container .error-text {
+  margin-top: 15px;
   color: var(--textColor-error);
+}
+
+#login-page-container .success-text {
+  margin-bottom: 15px;
+  color: var(--textColor-success);
 }
 
 /* NAVBAR  and FOOTER */
