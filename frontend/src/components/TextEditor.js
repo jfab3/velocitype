@@ -40,13 +40,19 @@ class TextEditor {
     async loadHtmlFromServer () {
         const token = this._user && await this._user.getIdToken();
         const headers = token ? { authtoken: token } : {};
-        const response = await axios.get(`/api/documents/${this._docId}`, { headers });
-        const docInfo = response.data;
-        if (!docInfo) {
-            return;
+        try {
+            const response = !this._isLoading && await axios.get(`/api/documents/${this._docId}`, { headers });
+            const docInfo = response && response.data;
+            if (!docInfo) {
+                return;
+            }
+            this._contentEditableDiv.innerHTML = docInfo.html;
+        } catch (error) {
+            if (!this._isLoading && error.response.status === 403) {
+                this._contentEditableDiv.contentEditable = false;
+                this._contentEditableDiv.innerHTML = "You do not have the permissions to open this document.";
+            }
         }
-
-        this._contentEditableDiv.innerHTML = docInfo.html;
     }
 
     async saveHtmlToServer () {

@@ -40,6 +40,7 @@ const NavBar = () => {
             
             <nav className="page-links-container">
                 <Link to="/">Home</Link>
+                <Link to="/my-docs">Docs</Link>
                 <Link to="/development">Development</Link>
                 <Link to="/about">About</Link>
             </nav >

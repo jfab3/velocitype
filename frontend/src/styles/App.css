@@ -115,10 +115,8 @@ body {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
 }
 
-
-
-/* ABOUT PAGE and DEV DETAILS PAGE and LOGIN PAGE*/
-#about-page-container, #dev-details-page-container, #login-page-container {
+/* ABOUT PAGE and DEV DETAILS PAGE and MY DOCS PAGE and LOGIN PAGE*/
+#about-page-container, #dev-details-page-container, #my-docs-page-container, #login-page-container {
   display: flex;
   flex-direction: column;
   margin: 0 auto;
@@ -179,6 +177,24 @@ body {
   width: 6rem;
   padding: 1rem;
   margin: 0.5rem; 
+}
+
+#my-docs-page-container .documents-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+  grid-gap: 10px;
+}
+
+#my-docs-page-container .documents-grid > .demo-details-container {
+  aspect-ratio: 2 / 1;
+  overflow: scroll;
+  padding: 0;
+  cursor: pointer;
+}
+
+#my-docs-page-container .documents-grid > .demo-details-container:hover {
+  box-shadow: 0px 0px 5px var(--boxShadowColor);
+  background-color: var(--mainColor);
 }
 
 #login-page-container #login-directions {

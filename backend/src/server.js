@@ -33,8 +33,32 @@ app.get('/api/documents/:docId', async (req, res) => {
     const document = await db.collection('documents').findOne({ docId });
     
     const documentOwnerId = document && document.docOwnerId;
-    if (uid && uid === documentOwnerId) {
+
+    if (!document) {
+        // Document does not exist
+        // Do not send any HTML to load
+        res.send();
+    } else if (uid && uid === documentOwnerId) {
+        // Document exists and the requesting user is authorized to view it
+        // Send the document HTML content
         res.json(document);
+    } else if (documentOwnerId) {
+        // Document exists and has an owner, but the requesting user is not authorized to view it
+        // Notify the user they cannot view the document
+        res.sendStatus(403);
+    } else {
+        // Document exists but does not have an owner
+        // Do not send any HTML to load
+        res.send();
+    }
+});
+
+app.get('/api/user/documents', async (req, res) => {
+    const { uid } = req.user;
+    
+    if (uid) {
+        const documents = await db.collection('documents').find({ docOwnerId: uid }).toArray();
+        res.json(documents);
     } else {
         res.send();
     }
@@ -59,12 +83,12 @@ app.put('/api/documents/:docId/save', async (req, res) => {
     if (!document) {
         await db.collection('documents').insertOne({ docId: docId, docOwnerId: uid, html: html });
     } else if (uid && !document.docOwnerId) {
-        // document exists but has no owner
+        // Document exists but has no owner
         await db.collection('documents').updateOne({ docId }, 
             { $set: { html: html, docOwnerId: uid } }
         );
     } else if (uid && uid === document.docOwnerId) {
-        // document exists and the owner is the same as the requesting user
+        // Document exists and the requesting user is authorized to view it
         await db.collection('documents').updateOne({ docId }, 
             { $set: { html: html } }
         );
