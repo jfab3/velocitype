@@ -83,7 +83,7 @@ function LoginPage() {
                         </>
                     : 
                         <>
-                            <div id="login-directions">Enter your email to receive a sign-in link</div>
+                            <div className="login-directions">Enter your email to receive a sign-in link</div>
                             <input 
                                 name="email-input"
                                 className="login-input" 

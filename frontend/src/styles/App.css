@@ -70,7 +70,7 @@ body {
   justify-items: center;
 }
 
-.alignment-button, .continue-button, .home-button, .navbar-button {
+.alignment-button, .continue-button, .home-button, .sign-in-button, .navbar-button {
   display: flex;
   border-radius: 5px;
   border: none;
@@ -90,14 +90,14 @@ body {
   margin: 10px;
 }
 
-.continue-button, .home-button {
+.continue-button, .home-button, .sign-in-button {
   background-color: var(--mainColor-greener);
   flex: 0 0 35px;
   padding: 5px 20px;
   margin: 0;
 }
 
-.home-button {
+.home-button, .sign-in-button {
   align-self: stretch;
 }
 
@@ -111,7 +111,7 @@ body {
   font-size: 18px;
 }
 
-.alignment-button:hover, .continue-button:hover, .home-button:hover, .navbar-button:hover {
+.alignment-button:hover, .continue-button:hover, .home-button:hover, .sign-in-button:hover, .navbar-button:hover {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
 }
 
@@ -139,7 +139,8 @@ body {
   justify-content: space-evenly;
 }
 
-#login-page-container .demo-details-container {
+#login-page-container .demo-details-container,
+#my-docs-page-container .demo-details-container {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
@@ -182,22 +183,26 @@ body {
 #my-docs-page-container .documents-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-  grid-gap: 10px;
+  grid-gap: 13px;
 }
 
-#my-docs-page-container .documents-grid > .demo-details-container {
+#my-docs-page-container .documents-grid > * {
   aspect-ratio: 2 / 1;
-  overflow: scroll;
   padding: 0;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  border-radius: 3px;
+  box-shadow: 0px 0px 3px var(--boxShadowColor);
+  background-color: var(--secondaryColor);
   cursor: pointer;
 }
 
-#my-docs-page-container .documents-grid > .demo-details-container:hover {
+#my-docs-page-container .documents-grid > *:hover {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
   background-color: var(--mainColor);
 }
 
-#login-page-container #login-directions {
+.login-directions {
   margin-bottom: 10px;
   text-align: left;
 }

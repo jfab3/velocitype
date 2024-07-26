@@ -12,6 +12,10 @@ function MyDocsPage() {
         navigate(`/document/${docId}`);
     }
 
+    const navigateToSignIn = () => {
+        navigate('/signin');
+    }
+
     useEffect(() => {
         const getMyDocuments = async () => {
             const token = user && await user.getIdToken();
@@ -38,15 +42,23 @@ function MyDocsPage() {
     return(
         <div id="my-docs-page-container">
             <h1 className="page-h1">My Documents</h1>
-            <div className="documents-grid">
-                {myDocuments && myDocuments.map(doc => (
-                    <div 
-                        className="demo-details-container" 
-                        dangerouslySetInnerHTML={{__html: doc.html}}
-                        onClick={() => navigateToDoc(doc.docId)}>
-                    </div>
-                ))}
-            </div>
+            {user
+                    ? 
+                        <div className="documents-grid">
+                        {myDocuments && myDocuments.map(doc => (
+                            <div 
+                                dangerouslySetInnerHTML={{__html: doc.html}}
+                                onClick={() => navigateToDoc(doc.docId)}>
+                            </div>
+                        ))}
+                        </div>
+                    : 
+                        <div className="demo-details-container">
+                            <div className="login-directions">Sign in to view your saved docs</div>
+                            <button name="sign-in-button" className="sign-in-button" onClick={navigateToSignIn}>Sign In</button>
+                        </div>
+                }
+            
         </div>
     )
 }
