@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from "react-router-dom";
 import useUser from '../hooks/useUser';
 import axios from 'axios';
+import sanitizeHtml from 'sanitize-html';
 
 function MyDocsPage() {
     const { user, isLoading } = useUser();
@@ -14,6 +15,17 @@ function MyDocsPage() {
 
     const navigateToSignIn = () => {
         navigate('/signin');
+    }
+
+    const getSanitizedHtml = (dirtyHtml) => {
+        const allowedHtml = { 
+            allowedTags: ['div', 'span', 'br'],
+            allowedAttributes: { 'span': ["style", "class"] },
+            allowedStyles: { 'p': { 'font-size': [/^\d+rem$/] } }
+        }
+
+        const cleanHtml = sanitizeHtml(dirtyHtml, allowedHtml);
+        return cleanHtml;
     }
 
     useEffect(() => {
@@ -47,7 +59,7 @@ function MyDocsPage() {
                         <div className="documents-grid">
                         {myDocuments && myDocuments.map(doc => (
                             <div 
-                                dangerouslySetInnerHTML={{__html: doc.html}}
+                                dangerouslySetInnerHTML={{__html: getSanitizedHtml(doc.html)}}
                                 onClick={() => navigateToDoc(doc.docId)}>
                             </div>
                         ))}

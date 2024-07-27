@@ -1,4 +1,5 @@
 import axios from 'axios';
+import sanitizeHtml from 'sanitize-html';
 
 class TextEditor {
 
@@ -11,10 +12,25 @@ class TextEditor {
         this._contentEditableDiv.contentEditable = true;
         this._contentEditableDiv.spellcheck = false;
         this._contentEditableDiv.className = "content-editable-div";
+
+        this._allowedHtml = { 
+            allowedTags: ['div', 'span', 'br'],
+            allowedAttributes: { 'span': ["style", "class"] },
+            allowedStyles: { 'p': { 'font-size': [/^\d+rem$/] } }
+        }
         
-        this._contentEditableDiv.onbeforeinput = this.handleKeyDown.bind(this);
+        this._contentEditableDiv.onbeforeinput = this.handleBeforeInput.bind(this);
         this._contentEditableDiv.onblur = this.handleOnBlur.bind(this);
         // this._contentEditableDiv.onpaste = this.catchPaste.bind(this);
+        const observer = new MutationObserver(mutations => {
+            mutations.forEach(mutation => {
+                if (mutation.type === 'childList') {
+                    mutation.addedNodes.forEach(node => this.enforceHierarchy(node));
+                }
+            })
+        });
+        observer.observe(this._contentEditableDiv, { childList: true, subtree: true });
+    
 
         this._timerId;
         this._timeElapsed = 1;
@@ -46,7 +62,9 @@ class TextEditor {
             if (!docInfo) {
                 return;
             }
-            this._contentEditableDiv.innerHTML = docInfo.html;
+            const dirtyHtml = docInfo.html;
+            const cleanHtml = sanitizeHtml(dirtyHtml, this._allowedHtml);
+            this._contentEditableDiv.innerHTML = cleanHtml;
         } catch (error) {
             if (!this._isLoading && error.response.status === 403) {
                 this._contentEditableDiv.contentEditable = false;
@@ -58,9 +76,11 @@ class TextEditor {
     async saveHtmlToServer () {
         const token = this._user && await this._user.getIdToken();
         const headers = token ? { authtoken: token } : {};
+        const dirtyHtml = this._contentEditableDiv.innerHTML;
+        const cleanHtml = sanitizeHtml(dirtyHtml, this._allowedHtml);
         await axios.put(`/api/documents/${this._docId}/save`, {
             docId: this._docId,
-            html: this._contentEditableDiv.innerHTML
+            html: cleanHtml
         }, { 
             headers
         });
@@ -85,9 +105,9 @@ class TextEditor {
         // Get pasted data from clipboard API
         clipboardData = e.clipboardData || window.clipboardData;
         pastedData = clipboardData.getData('Text');
-    } 
+    }
 
-    handleKeyDown (e) {
+    handleBeforeInput (e) {
         if (e.inputType === "insertFromPaste") {
             e.stopPropagation();
             e.preventDefault();
@@ -96,7 +116,7 @@ class TextEditor {
 
         this._numTextChanges += 1;
         const speed = this._calculateSpeed();
-        const fontSize = `${speed * 12 + 8}px`;
+        const fontSize = `${speed * 0.75 + 0.5}em`;
         const eventKey = e.data;
         // not a good way to check, just for the time being...
         if (eventKey !== null) {
@@ -130,14 +150,43 @@ class TextEditor {
         } 
     }
 
-    _setNewText (newTexElem) {
+    enforceHierarchy (addedNode) {
+        if (addedNode.nodeType === Node.ELEMENT_NODE) {
+            if (addedNode === this._contentEditableDiv) { // content-editable selected
+                // do nothing
+            } else if (addedNode.parentNode === this._contentEditableDiv) { // section div selected
+                if (addedNode.nodeName !== 'DIV') {
+                    addedNode.remove();
+                }
+            } else if (addedNode.parentNode.parentNode === this._contentEditableDiv) { // text-span selected
+                if (addedNode.nodeName !== 'SPAN') {
+                    addedNode.remove();
+                }
+            } else if (addedNode.parentNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
+                // do nothing
+            }
+        }
+    }
+
+    _setNewText (dirtyNewTextElem) {
         /**
          * DOM Structure:
-         *      content-editable
-         *          section divs
-         *              text-spans
-         *                  text
+         *      > content-editable
+         *          > section-divs
+         *              > text-spans
+         *                  > IF EMPTY: br
+         *                  > IF NOT EMPTY: text-node
          */
+
+        const cleanHtml = sanitizeHtml(dirtyNewTextElem.outerHTML, this._allowedHtml);
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = cleanHtml;
+        let newTextElem;
+        if (tempDiv.firstChild) {
+            newTextElem = tempDiv.firstChild.cloneNode(true);
+        } else {
+            return;
+        }
 
         const anchorNode = document.getSelection().anchorNode;
         const anchorNodeOffset = document.getSelection().anchorOffset;
@@ -151,7 +200,7 @@ class TextEditor {
 
             if (childrenNodes.length === 0) {
                 const newSection = document.createElement("div");
-                newSection.appendChild(newTexElem);
+                newSection.appendChild(newTextElem);
                 this._contentEditableDiv.appendChild(newSection);
                 this._range.setStartAfter(newSection.children[0], 0);
                 this._range.collapse(true);
@@ -164,7 +213,7 @@ class TextEditor {
             // Need to delete stale <BR> and <DIV><BR><DIV> that are sometimes left behind...
 
             this._range.collapse(true);
-            this._range.insertNode(newTexElem);
+            this._range.insertNode(newTextElem);
             this._range.collapse();
 
             this._selection.removeAllRanges();
@@ -172,7 +221,7 @@ class TextEditor {
         } else if (anchorNode.parentNode === this._contentEditableDiv) { // section div selected
             console.log("Section Div Selected");
             this._range.collapse(true);
-            this._range.insertNode(newTexElem);
+            this._range.insertNode(newTextElem);
             this._range.collapse();
 
             this._selection.removeAllRanges();
@@ -180,14 +229,13 @@ class TextEditor {
         } else if (anchorNode.parentNode.parentNode === this._contentEditableDiv) { // text-span selected
             console.log("Text Span Selected");
 
-            // Find a better way to check this
-            // Replace <br> in new paragraphs
-            if (anchorNode.children && anchorNode.children[0].nodeName === 'BR') {
+            // Replace text-span containing br in new section
+            if (anchorNode.children?.[0]?.nodeName === 'BR') {
                 this._range.setStartBefore(anchorNode);
                 this._range.setEndAfter(anchorNode);
                 this._range.deleteContents();
-                this._range.insertNode(newTexElem);
-                this._range.setStartAfter(newTexElem);
+                this._range.insertNode(newTextElem);
+                this._range.setStartAfter(newTextElem);
                 this._range.collapse(true);
 
                 this._selection.removeAllRanges();
@@ -204,7 +252,7 @@ class TextEditor {
             
             this._range.setStartAfter(textSpanNodesInSection[textSpanNodeIdx], 0);
             this._range.collapse(true);
-            this._range.insertNode(newTexElem);
+            this._range.insertNode(newTextElem);
             this._range.setStartAfter(textSpanNodesInSection[textSpanNodeIdx + 1], 0);
             this._range.collapse(true);
 
@@ -226,7 +274,7 @@ class TextEditor {
             const focusNodeTextSpanIdx = [...focusNodeSection.children].indexOf(focusNode.parentNode);
             
             this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset);
-            this._range.insertNode(newTexElem);
+            this._range.insertNode(newTextElem);
             const anchorNodeShiftAfterInsert = 1;
             const focusNodeShiftAfterInsert = (anchorNodeSectionIdx === focusNodeSectionIdx) ? 1 : 0; 
 
@@ -244,7 +292,7 @@ class TextEditor {
     _calculateSpeed () {
         const numRecentTimeStamps = 20;
         let lenTimeStampHistory = this._keyPressTimeStamps.unshift(this._timeElapsed);
-        if (lenTimeStampHistory == numRecentTimeStamps) {
+        if (lenTimeStampHistory > numRecentTimeStamps) {
             this._keyPressTimeStamps.pop();
             lenTimeStampHistory -= 1;
         }

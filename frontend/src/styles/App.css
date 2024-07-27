@@ -188,9 +188,9 @@ body {
 
 #my-docs-page-container .documents-grid > * {
   aspect-ratio: 2 / 1;
+  font-size: 6px;
   padding: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  overflow: hidden;
   border-radius: 3px;
   box-shadow: 0px 0px 3px var(--boxShadowColor);
   background-color: var(--secondaryColor);
