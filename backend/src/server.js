@@ -1,12 +1,19 @@
 import fs from 'fs';
 import admin from 'firebase-admin';
 import express from 'express';
+import sanitizeHtml from 'sanitize-html';
 import { db, connectToDB } from './db.js';
 
 const credentials = JSON.parse(fs.readFileSync('./credentials.json'));
 admin.initializeApp({
     credential: admin.credential.cert(credentials)
 });
+
+const allowedHtml = { 
+    allowedTags: ['div', 'span', 'br'],
+    allowedAttributes: { 'span': ["style", "class"] },
+    allowedStyles: { 'p': { 'font-size': [/^\d+rem$/] } }
+}
 
 const app = express();
 app.use(express.json());
@@ -41,6 +48,8 @@ app.get('/api/documents/:docId', async (req, res) => {
     } else if (uid && uid === documentOwnerId) {
         // Document exists and the requesting user is authorized to view it
         // Send the document HTML content
+        const cleanHtml = sanitizeHtml(document.html, allowedHtml);
+        document.html = cleanHtml;
         res.json(document);
     } else if (documentOwnerId) {
         // Document exists and has an owner, but the requesting user is not authorized to view it
@@ -55,9 +64,13 @@ app.get('/api/documents/:docId', async (req, res) => {
 
 app.get('/api/user/documents', async (req, res) => {
     const { uid } = req.user;
-    
+
     if (uid) {
         const documents = await db.collection('documents').find({ docOwnerId: uid }).toArray();
+        for (const document of documents) {
+            const cleanHtml = sanitizeHtml(document.html, allowedHtml);
+            document.html = cleanHtml;
+        }
         res.json(documents);
     } else {
         res.send();
@@ -76,8 +89,9 @@ app.use((req, res, next) => {
 app.put('/api/documents/:docId/save', async (req, res) => {
     const { docId } = req.params;
     const { uid } = req.user;
-    const { html } = req.body;
-
+    let { html } = req.body;
+    html = sanitizeHtml(html, allowedHtml);
+    
     let document = await db.collection('documents').findOne({ docId });
 
     if (!document) {
