@@ -152,17 +152,23 @@ class TextEditor {
 
     enforceHierarchy (addedNode) {
         if (addedNode.nodeType === Node.ELEMENT_NODE) {
-            if (addedNode === this._contentEditableDiv) { // content-editable selected
+            if (addedNode === this._contentEditableDiv) { // content-editable level
                 // do nothing
-            } else if (addedNode.parentNode === this._contentEditableDiv) { // section div selected
+            } else if (addedNode.parentNode === this._contentEditableDiv) { // section div level
                 if (addedNode.nodeName !== 'DIV') {
+                    // On "delete all", a BR is sometimes added at this level. In that case, addedNode should be deleted.
                     addedNode.remove();
                 }
-            } else if (addedNode.parentNode.parentNode === this._contentEditableDiv) { // text-span selected
+            } else if (addedNode.parentNode?.parentNode === this._contentEditableDiv) { // text-span level
+                // do nothing
+                /*
+                console.log("Text Span Added");
                 if (addedNode.nodeName !== 'SPAN') {
-                    addedNode.remove();
+                    // On "delete all", a BR is sometimes added at this level. In that case, the SECTION DIV containing addedNode should be deleted.
+                    addedNode.parentNode.remove();
                 }
-            } else if (addedNode.parentNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
+                */
+            } else if (addedNode.parentNode?.parentNode?.parentNode === this._contentEditableDiv) { // text-node level
                 // do nothing
             }
         }
@@ -210,8 +216,10 @@ class TextEditor {
                 return;
             }
 
-            // Need to delete stale <BR> and <DIV><BR><DIV> that are sometimes left behind...
-
+            // I think the only way to get here is to reload a document that already has some content then start typing...
+            // Could be wrong though...
+            this._range.setStart(anchorNode.children[0], 0);
+            
             this._range.collapse(true);
             this._range.insertNode(newTextElem);
             this._range.collapse();
@@ -220,6 +228,11 @@ class TextEditor {
             this._selection.addRange(this._range);
         } else if (anchorNode.parentNode === this._contentEditableDiv) { // section div selected
             console.log("Section Div Selected");
+            
+            if (this._range.commonAncestorContainer === document) {
+                this._range.setStart(anchorNode, anchorNodeOffset);
+                this._range.setEnd(focusNode, focusNodeOffset);
+            }
             this._range.collapse(true);
             this._range.insertNode(newTextElem);
             this._range.collapse();
@@ -263,7 +276,6 @@ class TextEditor {
 
             const sectionDivNodes = this._contentEditableDiv.children;
             
-
             // Need to check if anchorNode or focusNode comes first in the editor...
             const anchorNodeSectionIdx = [...this._contentEditableDiv.children].indexOf(anchorNode.parentNode.parentNode);
             const anchorNodeSection = sectionDivNodes[anchorNodeSectionIdx];
