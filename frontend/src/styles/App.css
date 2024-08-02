@@ -115,6 +115,24 @@ body {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
 }
 
+.icon-button {
+  display: flex;
+  align-items: center;
+  background-color: var(--secondaryColor);
+  color: var(--textColor-secondary);
+  border: none;
+  border-radius: 5px;
+  padding: 3px;
+  margin-right: 5px;
+  cursor: pointer;
+  font-size: 1.25rem;
+}
+
+.icon-button:hover {
+  background-color: var(--mainColor);
+  box-shadow: 0px 0px 5px var(--boxShadowColor);
+}
+
 /* ABOUT PAGE and DEV DETAILS PAGE and MY DOCS PAGE and LOGIN PAGE*/
 #about-page-container, #dev-details-page-container, #my-docs-page-container, #login-page-container {
   display: flex;
@@ -186,7 +204,7 @@ body {
   grid-gap: 13px;
 }
 
-#my-docs-page-container .documents-grid > * {
+#my-docs-page-container .documents-grid > .document-preview {
   aspect-ratio: 2 / 1;
   font-size: 6px;
   padding: 0;
@@ -197,9 +215,25 @@ body {
   cursor: pointer;
 }
 
-#my-docs-page-container .documents-grid > *:hover {
+#my-docs-page-container .documents-grid > .document-preview .document-preview-toolbar {
+  display: flex;
+  height: 2rem;
+  align-items: center;
+  justify-content: flex-end;
+  box-shadow: 0px 0px 3px var(--boxShadowColor);
+}
+
+#my-docs-page-container .documents-grid > .document-preview .document-preview-content {
+  height: 100%;
+}
+
+#my-docs-page-container .documents-grid > .document-preview:hover {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
   background-color: var(--mainColor);
+}
+
+#my-docs-page-container .documents-grid > .document-preview:hover .document-preview-toolbar {
+  background-color: var(--secondaryColor);
 }
 
 .login-directions {

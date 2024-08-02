@@ -66,7 +66,7 @@ app.get('/api/user/documents', async (req, res) => {
     const { uid } = req.user;
 
     if (uid) {
-        const documents = await db.collection('documents').find({ docOwnerId: uid }).toArray();
+        const documents = await db.collection('documents').find({ docOwnerId: uid }, {sort: { _id: -1 }}).toArray();
         for (const document of documents) {
             const cleanHtml = sanitizeHtml(document.html, allowedHtml);
             document.html = cleanHtml;
@@ -109,6 +109,14 @@ app.put('/api/documents/:docId/save', async (req, res) => {
     }
 
     res.send(`The document with id ${docId} now has the html ${html}.`);
+});
+
+app.delete('/api/documents/:docId/delete', async (req, res) => {
+    const { docId } = req.params;
+    const { uid } = req.user;
+
+    const result = await db.collection('documents').deleteOne({ docId: docId, docOwnerId: uid });
+    res.send();
 });
 
 connectToDB(() => {
