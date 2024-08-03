@@ -12,7 +12,7 @@ function LoginPage() {
     const actionCodeSettings = {
         // URL you want to redirect back to. The domain (www.example.com) for this
         // URL must be in the authorized domains list in the Firebase Console.
-        url: 'http://localhost:5173/signin',
+        url: 'http://localhost:8000/signin',
         // This must be true.
         handleCodeInApp: true
     };
