@@ -63,7 +63,7 @@ function MyDocsPage() {
     }, [user, isLoading]);
 
     return (
-        <div id="my-docs-page-container">
+        <div id="my-docs-page-container" className='page-container'>
             <h1 className="page-h1">My Documents</h1>
             {user 
                 ? 

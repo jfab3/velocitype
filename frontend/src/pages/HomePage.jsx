@@ -31,7 +31,7 @@ function HomePage() {
 
     return (
         <>
-        <div id="home-page-container">
+        <div id="home-page-container" className='page-container'>
             <div id="basic-directions-container">
                 <div>Velocitype styles your text based on the speed at which you type.</div>
             </div>

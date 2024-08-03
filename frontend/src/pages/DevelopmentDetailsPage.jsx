@@ -5,7 +5,7 @@ import figmaLogo from '../assets/Figma-Icon.svg';
 
 function DevelopmentDetailsPage() {
     return(
-        <div id="dev-details-page-container">
+        <div id="dev-details-page-container" className='page-container'>
             <h1 className="page-h1">Development</h1>
             <div className="demo-details-container">
                 <a href="https://github.com/jfab3/velocitype" target="_blank">
