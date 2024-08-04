@@ -6,6 +6,7 @@ import './styles/index.css'
 import { initializeApp } from "firebase/app";
 
 // Your web app's Firebase configuration
+// NOTE: These are public keys and do not need to be stored securely
 const firebaseConfig = {
   apiKey: "AIzaSyC3GA_V3g1ZJ8LWSKQ7yqr3Qws84vOFwbI",
   authDomain: "velocitype-d9ef9.firebaseapp.com",
