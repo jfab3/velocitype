@@ -1,7 +1,7 @@
-import githubLogo from '../assets/github-mark.svg';
-import reactLogo from '../assets/react.svg';
-import viteLogo from '../assets/Vite-Logo.svg';
-import figmaLogo from '../assets/Figma-Icon.svg';
+import githubLogo from '/github-mark.svg';
+import reactLogo from '/react.svg';
+import viteLogo from '/vite.svg';
+import figmaLogo from '/figma.svg';
 
 function DevelopmentDetailsPage() {
     return(
