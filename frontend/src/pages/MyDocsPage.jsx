@@ -69,7 +69,7 @@ function MyDocsPage() {
                 ? 
                     <div className="documents-grid">
                     {myDocuments && myDocuments.map(doc => (
-                        <div className="document-preview">
+                        <div className="document-preview" key={doc.docId}>
                             <div className="document-preview-toolbar">
                                 <IconButton onClick={() => deleteDocument(doc)} Icon={MdDeleteOutline} />
                             </div>
