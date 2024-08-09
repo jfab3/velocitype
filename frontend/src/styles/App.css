@@ -65,6 +65,12 @@ body {
 
 /* BUTTONS */
 
+button {
+  background-color: unset;
+  color: unset;
+  border: unset;
+}
+
 #alignment-button-container {
   display: flex;
   justify-items: center;
@@ -205,6 +211,8 @@ body {
 }
 
 #my-docs-page-container .documents-grid > .document-preview {
+  display: flex;
+  flex-direction: column;
   aspect-ratio: 2 / 1;
   font-size: 6px;
   padding: 0;
@@ -225,6 +233,7 @@ body {
 
 #my-docs-page-container .documents-grid > .document-preview .document-preview-content {
   height: 100%;
+  font: unset;
 }
 
 #my-docs-page-container .documents-grid > .document-preview:hover {

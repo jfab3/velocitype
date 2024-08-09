@@ -73,10 +73,10 @@ function MyDocsPage() {
                             <div className="document-preview-toolbar">
                                 <IconButton onClick={() => deleteDocument(doc)} Icon={MdDeleteOutline} />
                             </div>
-                            <div className="document-preview-content"
+                            <button className="document-preview-content"
                                 dangerouslySetInnerHTML={{__html: getSanitizedHtml(doc.html)}}
                                 onClick={() => navigateToDoc(doc.docId)}>
-                            </div>
+                            </button>
                         </div>
                     ))}
                     </div>
