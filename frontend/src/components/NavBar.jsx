@@ -2,6 +2,7 @@ import { useRef } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signOut } from "firebase/auth";
 import useUser from "../hooks/useUser";
+import DropdownMenu from "./DropdownMenu";
 
 const NavBar = () => {
     const { user, isLoading } = useUser();
@@ -24,7 +25,7 @@ const NavBar = () => {
     return (
         <header id="navbar">
             <span ref={titleTextRef} className="title">
-                <Link to="/">
+                <Link to="/" className="navbar-link">
                     <span className="titleLetter">V</span>
                     <span className="titleLetter">E</span>
                     <span className="titleLetter">L</span>
@@ -39,10 +40,10 @@ const NavBar = () => {
             </span>
             
             <nav className="page-links-container">
-                <Link to="/">Home</Link>
-                <Link to="/my-docs">Docs</Link>
-                <Link to="/development">Development</Link>
-                <Link to="/about">About</Link>
+                <Link to="/" className="navbar-link">Home</Link>
+                <Link to="/my-docs" className="navbar-link">Docs</Link>
+                <Link to="/development" className="navbar-link">Development</Link>
+                <Link to="/about" className="navbar-link">About</Link>
             </nav >
 
             <span className="sign-in-link-container">
@@ -50,6 +51,16 @@ const NavBar = () => {
                     ? !isLoading && <button className="navbar-button" onClick={logOut}>Sign Out</button>
                     : !isLoading && <button className="navbar-button" onClick={navigateToLogIn}>Sign In</button>}
             </span>
+
+            <DropdownMenu>
+                <Link to="/" id="home-dropdown-item" className="navbar-link">Home</Link>
+                <Link to="/my-docs" id="docs-dropdown-item" className="navbar-link">Docs</Link>
+                <Link to="/development" id="dev-dropdown-item" className="navbar-link">Development</Link>
+                <Link to="/about" id="about-dropdown-item" className="navbar-link">About</Link>
+                {user 
+                    ? !isLoading && <button id="sign-out-dropdown-item" className="navbar-link" onClick={logOut}>Sign Out</button>
+                    : !isLoading && <button id="sign-in-dropdown-item" className="navbar-link" onClick={navigateToLogIn}>Sign In</button>}
+            </DropdownMenu>
         </header>
     )
 }
