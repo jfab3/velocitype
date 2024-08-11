@@ -5,6 +5,7 @@ import useUser from "../hooks/useUser";
 
 function LoginPage() {
     const [email, setEmail] = useState('');
+    const [isLoginEmailSent, setIsLoginEmailSent] = useState(false);
     const [error, setError] = useState('');
     const { user, isLoading } = useUser();
     const navigate = useNavigate();
@@ -24,9 +25,10 @@ function LoginPage() {
             // Save the email locally so you don't need to ask the user for it again
             // if they open the link on the same device.
             window.localStorage.setItem('emailForSignIn', email);
-            navigate('/');
+            setIsLoginEmailSent(true);
         }).catch((error) => {
             setError(error.message);
+            setIsLoginEmailSent(false);
         });
     }
 
@@ -71,29 +73,35 @@ function LoginPage() {
     }, [user])
 
     return(
-        <div id="login-page-container" className='page-container'>
+        <div id="login-page-container" className="page-container">
             {!isLoading && <>
             <h1 className="page-h1">Sign In</h1>
             <div className="demo-details-container">
-                {user
-                    ? 
-                        <>
-                            <div className="success-text">{`Successfully signed in as ${email}`}</div>
-                            <button name="home-button" className="home-button" onClick={navigateToHome}>Home</button>
-                        </>
-                    : 
-                        <>
-                            <div className="login-directions">Enter your email to receive a sign-in link</div>
-                            <input 
-                                name="email-input"
-                                className="login-input" 
-                                type="Email" 
-                                placeholder="Email address"
-                                value={email}
-                                onChange={e => setEmail(e.target.value)}
-                            />
-                            <button name="continue-button" className="continue-button" onClick={logIn}>Continue</button>
-                        </>
+                {user &&
+                    <>
+                        <div className="success-text">{`Successfully signed in as ${email}`}</div>
+                        <button name="home-button" className="home-button" onClick={navigateToHome}>Home</button>
+                    </>
+                }
+                {!user && !isLoginEmailSent &&
+                    <>
+                        <div className="login-directions">Enter your email to receive a sign-in link</div>
+                        <input 
+                            name="email-input"
+                            className="login-input" 
+                            type="Email" 
+                            placeholder="Email address"
+                            value={email}
+                            onChange={e => setEmail(e.target.value)}
+                        />
+                        <button name="continue-button" className="continue-button" onClick={logIn}>Continue</button>
+                    </>
+                }
+                {!user && isLoginEmailSent &&
+                    <>
+                        <div className="login-directions">{`Sign-in link has been sent to ${email}`}</div>
+                        <button name="home-button" className="home-button" onClick={navigateToHome}>Home</button>
+                    </>
                 }
                 {error && <div className="error-text">{error}</div>}
             </div>
