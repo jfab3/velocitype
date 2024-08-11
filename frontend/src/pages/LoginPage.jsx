@@ -85,7 +85,7 @@ function LoginPage() {
                 }
                 {!user && !isLoginEmailSent &&
                     <>
-                        <div className="login-directions">Enter your email to receive a sign-in link</div>
+                        <div className="directions-text">Enter your email to receive a sign-in link</div>
                         <input 
                             name="email-input"
                             className="login-input" 
@@ -99,7 +99,7 @@ function LoginPage() {
                 }
                 {!user && isLoginEmailSent &&
                     <>
-                        <div className="login-directions">{`Sign-in link has been sent to ${email}`}</div>
+                        <div className="directions-text">{`Sign-in link has been sent to ${email}`}</div>
                         <button name="home-button" className="home-button" onClick={navigateToHome}>Home</button>
                     </>
                 }
