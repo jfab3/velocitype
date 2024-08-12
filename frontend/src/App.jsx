@@ -13,6 +13,7 @@ function App() {
   return (
     <BrowserRouter>
       <NavBar />
+      <div className="page-container">
       <Routes>
         <Route path="/" element={<Navigate to={`/document/${uuidV4()}`} />} />
         <Route path="/document/:docId" element={<HomePage />} />
@@ -21,6 +22,7 @@ function App() {
         <Route path="/about" element={<AboutPage />} />
         <Route path="/signin" element={<LoginPage />} />
       </Routes>
+      </div>
       <FooterBar />
     </BrowserRouter>
   )

@@ -73,7 +73,7 @@ function LoginPage() {
     }, [user])
 
     return(
-        <div id="login-page-container" className="page-container">
+        <div id="login-page-container">
             {!isLoading && <>
             <h1 className="page-h1">Sign In</h1>
             <div className="demo-details-container">

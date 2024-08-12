@@ -73,7 +73,7 @@ function MyDocsPage() {
     }, [user, isLoading]);
 
     return (
-        <div id="my-docs-page-container" className='page-container'>
+        <div id="my-docs-page-container">
             <h1 className="page-h1">My Documents</h1>
             {user && !isDocGridEmpty &&
                 <div className="documents-grid">

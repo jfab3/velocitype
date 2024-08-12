@@ -2,8 +2,6 @@ import { useState, useRef, useEffect } from 'react'
 import IconButton from '../components/IconButton';
 import { GiHamburgerMenu } from "react-icons/gi";
 
-import { Link } from "react-router-dom";
-
 const DropdownMenu = ({ children }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef();

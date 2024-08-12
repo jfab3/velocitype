@@ -1,7 +1,7 @@
 function AboutPage() {
     return(
         <>
-        <div id="about-page-container" className='page-container'>
+        <div id="about-page-container">
             <h1 className="page-h1">About</h1>
             <div className="demo-details-container">
                 <p>Velocitype is a simple text editor which styles your text in real-time.</p>
