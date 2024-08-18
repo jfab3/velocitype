@@ -106,7 +106,11 @@ app.put('/api/documents/:docId/save', async (req, res) => {
     
     let document = await db.collection('documents').findOne({ docId });
 
-    if (!document) {
+    if (!document && !html) {
+        // Do not create a new document if it is empty
+        return res.status(200).send('Request to save an empty document was ignored.');
+    } else if (!document && html) {
+        // Create a new document if it is non-empty
         await db.collection('documents').insertOne({ docId: docId, docOwnerId: uid, html: html });
     } else if (uid && !document.docOwnerId) {
         // Document exists but has no owner

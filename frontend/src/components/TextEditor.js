@@ -31,7 +31,6 @@ class TextEditor {
         });
         observer.observe(this._contentEditableDiv, { childList: true, subtree: true });
     
-
         this._timerId;
         this._timeElapsed = 1;
         this._numTextChanges = 0;
