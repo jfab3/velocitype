@@ -3,7 +3,7 @@ import { useParams } from 'react-router-dom';
 import useUser from '../hooks/useUser';
 import TextEditor from '../components/TextEditor';
 
-function HomePage() {
+function DocumentPage() {
     const { user, isLoading } = useUser();
     const [textAlignment, setTextAlignment] = useState("center");
     const textEditor = useRef()
@@ -46,4 +46,4 @@ function HomePage() {
     )
 }
 
-export default HomePage
+export default DocumentPage
