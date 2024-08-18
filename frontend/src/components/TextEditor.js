@@ -131,21 +131,6 @@ class TextEditor {
             if (!this._isTimerRunning) {
                 this.startTimer();
             }
-        } else if (e.inputType === "insertParagraph") {
-            return
-
-            e.stopPropagation();
-            e.preventDefault();
-            
-            const newline = document.createElement("div");
-            newline.innerHTML = " ";
-            newline.style.fontSize = fontSize;
-            newline.classList.add("text-span");
-            
-            this._setNewText(newline);
-            if (!this._isTimerRunning) {
-                this.startTimer();
-            }
         } 
     }
 
