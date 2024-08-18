@@ -1,8 +1,6 @@
-# React + Vite
+Velocitype is a simple text editor which styles your text in real-time.
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+As you type faster, the text gets larger.
+As you type slower, the text gets smaller.
 
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Try it out at [velocitype.app](https://velocitype.app)
