@@ -12,6 +12,10 @@ class TextEditor {
         this._contentEditableDiv.contentEditable = true;
         this._contentEditableDiv.spellcheck = false;
         this._contentEditableDiv.className = "content-editable-div";
+        // Set non-standard attributes using setAttribute
+        this._contentEditableDiv.setAttribute('autocorrect', 'off');
+        this._contentEditableDiv.setAttribute('autocomplete', 'off');
+        this._contentEditableDiv.setAttribute('autocapitalize', 'off');
 
         this._allowedHtml = { 
             allowedTags: ['div', 'span', 'br'],
