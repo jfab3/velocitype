@@ -111,13 +111,9 @@ class TextEditor {
     }
 
     handleBeforeInput (e) {
-        if (e.inputType === "insertFromPaste") {
-            e.stopPropagation();
-            e.preventDefault();
-            return;
-        }
-
-        if (e.inputType === "insertCompositionText") {
+        // Disable pasting, undo, redo and composition text
+        const blockedInputTypes = ["insertFromPaste", "historyUndo", "historyRedo", "insertCompositionText"];
+        if (blockedInputTypes.includes(e.inputType)) {
             e.stopPropagation();
             e.preventDefault();
             return;
@@ -151,13 +147,6 @@ class TextEditor {
                     }
                 } else if (addedNode.parentNode?.parentNode === this._contentEditableDiv) { // char-container level
                     // do nothing
-                    /*
-                    console.log("Text Span Added");
-                    if (addedNode.nodeName !== 'SPAN') {
-                        // On "delete all", a BR is sometimes added at this level. In that case, the SECTION DIV containing addedNode should be deleted.
-                        addedNode.parentNode.remove();
-                    }
-                    */
                 } else if (addedNode.parentNode?.parentNode?.parentNode === this._contentEditableDiv) { // text-node level
                     // do nothing
                 }
@@ -298,6 +287,10 @@ class TextEditor {
 
     _setNewTextForTextSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset) {
         console.log("Text Node Selected");
+        if (anchorNode.parentNode.parentNode.parentNode !== this._contentEditableDiv) {
+            console.log("Aborted");
+            return;
+        }
         const sectionDivNodes = this._contentEditableDiv.children;
         
         const anchorNodeSectionIdx = [...sectionDivNodes].indexOf(anchorNode.parentNode.parentNode);
