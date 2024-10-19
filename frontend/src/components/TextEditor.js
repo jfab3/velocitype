@@ -22,14 +22,14 @@ class TextEditor {
         this._contentEditableDiv.onbeforeinput = this.handleBeforeInput.bind(this);
         this._contentEditableDiv.onblur = this.handleOnBlur.bind(this);
         // this._contentEditableDiv.onpaste = this.catchPaste.bind(this);
-        const observer = new MutationObserver(mutations => {
+        this._observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach(node => this.enforceHierarchy(node));
+                    this.enforceHierarchy(mutation);
                 }
             })
         });
-        observer.observe(this._contentEditableDiv, { childList: true, subtree: true });
+        this._observer.observe(this._contentEditableDiv, { childList: true, subtree: true });
     
         this._timerId;
         this._timeElapsed = 1;
@@ -113,6 +113,12 @@ class TextEditor {
             return;
         }
 
+        if (e.inputType === "insertCompositionText") {
+            e.stopPropagation();
+            e.preventDefault();
+            return;
+        }
+
         this._numTextChanges += 1;
         const speed = this._calculateSpeed();
         const fontSize = `${speed * 0.75 + 0.5}em`;
@@ -122,167 +128,195 @@ class TextEditor {
             e.stopPropagation();
             e.preventDefault();
             
-            const span = document.createElement("span");
-            span.innerText = eventKey;
-            span.style.fontSize = fontSize;
-            span.classList.add("text-span");
-
-            this._setNewText(span);
+            this._addNewCharacter(eventKey, fontSize)
             if (!this._isTimerRunning) {
                 this.startTimer();
             }
         } 
     }
 
-    enforceHierarchy (addedNode) {
-        if (addedNode.nodeType === Node.ELEMENT_NODE) {
-            if (addedNode === this._contentEditableDiv) { // content-editable level
-                // do nothing
-            } else if (addedNode.parentNode === this._contentEditableDiv) { // section div level
-                if (addedNode.nodeName !== 'DIV') {
-                    // On "delete all", a BR is sometimes added at this level. In that case, addedNode should be deleted.
-                    addedNode.remove();
+    enforceHierarchy (mutation) {
+        mutation.addedNodes.forEach(addedNode => {
+            if (addedNode.nodeType === Node.ELEMENT_NODE) {
+                if (addedNode === this._contentEditableDiv) { // content-editable level
+                    // do nothing
+                } else if (addedNode.parentNode === this._contentEditableDiv) { // section div level
+                    if (addedNode.nodeName !== 'DIV') {
+                        // On "delete all", a BR is sometimes added at this level. In that case, addedNode should be deleted.
+                        addedNode.remove();
+                    }
+                } else if (addedNode.parentNode?.parentNode === this._contentEditableDiv) { // char-container level
+                    // do nothing
+                    /*
+                    console.log("Text Span Added");
+                    if (addedNode.nodeName !== 'SPAN') {
+                        // On "delete all", a BR is sometimes added at this level. In that case, the SECTION DIV containing addedNode should be deleted.
+                        addedNode.parentNode.remove();
+                    }
+                    */
+                } else if (addedNode.parentNode?.parentNode?.parentNode === this._contentEditableDiv) { // text-node level
+                    // do nothing
                 }
-            } else if (addedNode.parentNode?.parentNode === this._contentEditableDiv) { // text-span level
-                // do nothing
-                /*
-                console.log("Text Span Added");
-                if (addedNode.nodeName !== 'SPAN') {
-                    // On "delete all", a BR is sometimes added at this level. In that case, the SECTION DIV containing addedNode should be deleted.
-                    addedNode.parentNode.remove();
-                }
-                */
-            } else if (addedNode.parentNode?.parentNode?.parentNode === this._contentEditableDiv) { // text-node level
-                // do nothing
             }
-        }
+        });
     }
 
-    _setNewText (dirtyNewTextElem) {
+    _addNewCharacter (char, fontSize) {
         /**
          * DOM Structure:
          *      > content-editable
-         *          > section-divs
-         *              > text-spans
+         *          > section-div
+         *              > char-container
          *                  > IF EMPTY: br
          *                  > IF NOT EMPTY: text-node
          */
 
-        const cleanHtml = sanitizeHtml(dirtyNewTextElem.outerHTML, this._allowedHtml);
-        const tempDiv = document.createElement('div');
-        tempDiv.innerHTML = cleanHtml;
-        let newTextElem;
-        if (tempDiv.firstChild) {
-            newTextElem = tempDiv.firstChild.cloneNode(true);
+        const newTextElem = document.createElement("span");
+        newTextElem.innerText = char;
+        newTextElem.style.fontSize = fontSize;
+        newTextElem.classList.add("char-container");
+
+        let anchorNode = document.getSelection().anchorNode;
+        let anchorNodeOffset = document.getSelection().anchorOffset;
+
+        let focusNode = document.getSelection().focusNode;
+        let focusNodeOffset = document.getSelection().focusOffset;
+
+        if (anchorNode.compareDocumentPosition(focusNode) & Node.DOCUMENT_POSITION_PRECEDING) {
+            const anchorNodeTemp = anchorNode;
+            const anchorNodeOffsetTemp = anchorNodeOffset;
+
+            anchorNode = focusNode;
+            anchorNodeOffset = focusNodeOffset;
+
+            focusNode = anchorNodeTemp;
+            focusNodeOffset = anchorNodeOffsetTemp;
+        }
+        
+        if (anchorNode === this._contentEditableDiv) { // content-editable selected
+            this._setNewTextForContentEditableSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset);
+        } else if (anchorNode.parentNode === this._contentEditableDiv) { // section div selected
+            this._setNewTextForSectionDivSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset);
+        } else if (anchorNode.parentNode.parentNode === this._contentEditableDiv) { // char-container selected
+            this._setNewTextForCharContainerSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset);
+        } else if (anchorNode.parentNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
+            this._setNewTextForTextSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset);
+        }
+    }
+
+    _setNewTextForContentEditableSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset) {
+        console.log("Content Editable Selected");
+        if (anchorNode !== this._contentEditableDiv) {
+            console.log("Aborted");
+            return;
+        }
+        const sectionDivs = this._contentEditableDiv.children;
+
+        if (sectionDivs.length === 0) {
+            // Typing in an empty document
+            const newSection = document.createElement("div");
+            newSection.appendChild(newTextElem);
+            this._contentEditableDiv.appendChild(newSection);
+            
+            this._range.setStartAfter(newSection.children[0], 0);
+            this._range.collapse(true);
         } else {
+            // Reload existing non-empty document then type
+            this._range.setStart(anchorNode.children[0], 0);
+            this._range.collapse(true);
+            this._range.insertNode(newTextElem);
+            this._range.collapse();
+        }
+        this._selection.removeAllRanges();
+        this._selection.addRange(this._range);
+    }
+
+    _setNewTextForSectionDivSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset) {
+        console.log("Section Div Selected");
+        if (anchorNode.parentNode !== this._contentEditableDiv) {
+            console.log("Aborted");
+            return;
+        }
+            
+        this._range.setStart(anchorNode, anchorNodeOffset);
+        this._range.collapse(true);
+        this._range.insertNode(newTextElem);
+        this._range.setStart(anchorNode, anchorNodeOffset + 1);
+        if (anchorNode !== focusNode | anchorNodeOffset !== focusNodeOffset) {
+            const focusNodeShiftAfterInsert = (anchorNode === focusNode) ? 1 : 0; 
+            this._range.setEnd(focusNode, focusNodeOffset + focusNodeShiftAfterInsert);
+            this._range.deleteContents();
+            this._range.setStart(anchorNode, anchorNodeOffset + 1);
+        }
+        this._range.collapse(true);
+
+        this._selection.removeAllRanges();
+        this._selection.addRange(this._range);
+    }
+
+    _setNewTextForCharContainerSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset) {
+        console.log("Char Container Selected");
+        if (anchorNode.parentNode.parentNode !== this._contentEditableDiv) {
+            console.log("Aborted");
             return;
         }
 
-        const anchorNode = document.getSelection().anchorNode;
-        const anchorNodeOffset = document.getSelection().anchorOffset;
-
-        const focusNode = document.getSelection().focusNode;
-        const focusNodeOffset = document.getSelection().focusOffset;
-        
-        if (anchorNode === this._contentEditableDiv) { // content-editable selected
-            console.log("Content Editable Selected");
-            const childrenNodes = this._contentEditableDiv.children;
-
-            if (childrenNodes.length === 0) {
-                const newSection = document.createElement("div");
-                newSection.appendChild(newTextElem);
-                this._contentEditableDiv.appendChild(newSection);
-                this._range.setStartAfter(newSection.children[0], 0);
-                this._range.collapse(true);
-
-                this._selection.removeAllRanges();
-                this._selection.addRange(this._range);
-                return;
-            }
-
-            // I think the only way to get here is to reload a document that already has some content then start typing...
-            // Could be wrong though...
-            this._range.setStart(anchorNode.children[0], 0);
-            
-            this._range.collapse(true);
-            this._range.insertNode(newTextElem);
-            this._range.collapse();
-
-            this._selection.removeAllRanges();
-            this._selection.addRange(this._range);
-        } else if (anchorNode.parentNode === this._contentEditableDiv) { // section div selected
-            console.log("Section Div Selected");
-            
-            if (this._range.commonAncestorContainer === document) {
-                this._range.setStart(anchorNode, anchorNodeOffset);
-                this._range.setEnd(focusNode, focusNodeOffset);
-            }
-            this._range.collapse(true);
-            this._range.insertNode(newTextElem);
-            this._range.collapse();
-
-            this._selection.removeAllRanges();
-            this._selection.addRange(this._range);
-        } else if (anchorNode.parentNode.parentNode === this._contentEditableDiv) { // text-span selected
-            console.log("Text Span Selected");
-
-            // Replace text-span containing br in new section
-            if (anchorNode.children?.[0]?.nodeName === 'BR') {
-                this._range.setStartBefore(anchorNode);
-                this._range.setEndAfter(anchorNode);
-                this._range.deleteContents();
-                this._range.insertNode(newTextElem);
-                this._range.setStartAfter(newTextElem);
-                this._range.collapse(true);
-
-                this._selection.removeAllRanges();
-                this._selection.addRange(this._range);
-                return;
-            }
-
-            const sectionDivNodes = this._contentEditableDiv.children;
-
-            const selectedSectionIdx = [...this._contentEditableDiv.children].indexOf(anchorNode.parentNode);
-            const selectedSection = sectionDivNodes[selectedSectionIdx];
-            const textSpanNodesInSection = selectedSection.children;
-            const textSpanNodeIdx = [...selectedSection.children].indexOf(anchorNode);
-            
-            this._range.setStartAfter(textSpanNodesInSection[textSpanNodeIdx], 0);
-            this._range.collapse(true);
-            this._range.insertNode(newTextElem);
-            this._range.setStartAfter(textSpanNodesInSection[textSpanNodeIdx + 1], 0);
-            this._range.collapse(true);
-
-            this._selection.removeAllRanges();
-            this._selection.addRange(this._range);
-        } else if (anchorNode.parentNode.parentNode.parentNode === this._contentEditableDiv) { // text selected
-            console.log("Text Selected");
-
-            const sectionDivNodes = this._contentEditableDiv.children;
-            
-            // Need to check if anchorNode or focusNode comes first in the editor...
-            const anchorNodeSectionIdx = [...this._contentEditableDiv.children].indexOf(anchorNode.parentNode.parentNode);
-            const anchorNodeSection = sectionDivNodes[anchorNodeSectionIdx];
-            const anchorNodeTextSpanIdx = [...anchorNodeSection.children].indexOf(anchorNode.parentNode);
-
-            const focusNodeSectionIdx = [...this._contentEditableDiv.children].indexOf(focusNode.parentNode.parentNode);
-            const focusNodeSection = sectionDivNodes[focusNodeSectionIdx];
-            const focusNodeTextSpanIdx = [...focusNodeSection.children].indexOf(focusNode.parentNode);
-            
-            this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset);
-            this._range.insertNode(newTextElem);
-            const anchorNodeShiftAfterInsert = 1;
-            const focusNodeShiftAfterInsert = (anchorNodeSectionIdx === focusNodeSectionIdx) ? 1 : 0; 
-
-            this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset + anchorNodeShiftAfterInsert);
-            this._range.setEnd(focusNodeSection, focusNodeTextSpanIdx + focusNodeOffset + focusNodeShiftAfterInsert);
+        // Replace char-container containing br in new section
+        if (anchorNode.children?.[0]?.nodeName === 'BR') {
+            this._range.setStartBefore(anchorNode);
+            this._range.setEndAfter(anchorNode);
             this._range.deleteContents();
-            this._range.setStart(anchorNodeSection, anchorNodeTextSpanIdx + anchorNodeOffset + 1);
+            this._range.insertNode(newTextElem);
+            this._range.setStartAfter(newTextElem);
             this._range.collapse(true);
 
             this._selection.removeAllRanges();
             this._selection.addRange(this._range);
+            return;
         }
+
+        const sectionDivNodes = this._contentEditableDiv.children;
+
+        const selectedSectionIdx = [...this._contentEditableDiv.children].indexOf(anchorNode.parentNode);
+        const selectedSection = sectionDivNodes[selectedSectionIdx];
+        const charContainerNodesInSection = selectedSection.children;
+        const charContainerNodeIdx = [...selectedSection.children].indexOf(anchorNode);
+        
+        this._range.setStartAfter(charContainerNodesInSection[charContainerNodeIdx], 0);
+        this._range.collapse(true);
+        this._range.insertNode(newTextElem);
+        this._range.setStartAfter(charContainerNodesInSection[charContainerNodeIdx + 1], 0);
+        this._range.collapse(true);
+
+        this._selection.removeAllRanges();
+        this._selection.addRange(this._range);
+    }
+
+    _setNewTextForTextSelected (newTextElem, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset) {
+        console.log("Text Node Selected");
+        const sectionDivNodes = this._contentEditableDiv.children;
+        
+        const anchorNodeSectionIdx = [...sectionDivNodes].indexOf(anchorNode.parentNode.parentNode);
+        const anchorNodeSection = sectionDivNodes[anchorNodeSectionIdx];
+        const anchorNodeCharContainerIdx = [...anchorNodeSection.children].indexOf(anchorNode.parentNode);
+
+        const focusNodeSectionIdx = [...sectionDivNodes].indexOf(focusNode.parentNode.parentNode);
+        const focusNodeSection = sectionDivNodes[focusNodeSectionIdx];
+        const focusNodeCharContainerIdx = [...focusNodeSection.children].indexOf(focusNode.parentNode);
+        
+        this._range.setStart(anchorNodeSection, anchorNodeCharContainerIdx + anchorNodeOffset);
+        this._range.insertNode(newTextElem);
+        const anchorNodeShiftAfterInsert = 1;
+        const focusNodeShiftAfterInsert = (anchorNodeSectionIdx === focusNodeSectionIdx) ? 1 : 0; 
+
+        this._range.setStart(anchorNodeSection, anchorNodeCharContainerIdx + anchorNodeOffset + anchorNodeShiftAfterInsert);
+        this._range.setEnd(focusNodeSection, focusNodeCharContainerIdx + focusNodeOffset + focusNodeShiftAfterInsert);
+        this._range.deleteContents();
+        this._range.setStart(anchorNodeSection, anchorNodeCharContainerIdx + anchorNodeOffset + 1);
+        this._range.collapse(true);
+
+        this._selection.removeAllRanges();
+        this._selection.addRange(this._range);
     }
 
     _calculateSpeed () {
