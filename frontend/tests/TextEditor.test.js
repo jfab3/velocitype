@@ -184,3 +184,31 @@ test('_setNewTextForCharContainerSelected on an empty newline', () => {
   expect(textEditor._range.collapsed, 
     "Range should be empty").toBe(true);
 })
+
+test('_setNewTextForTextSelected between two characters', () => {
+  /**
+   * a|c
+   */
+  const div = document.createElement("div");
+  const textEditor = new TextEditor(div, "fakeDocId", "fakeUser", false);
+  textEditor._contentEditableDiv.innerHTML = "<div><span>a</span><span>c</span></div>";
+
+  const sampleSpan = document.createElement("span");
+  sampleSpan.appendChild(document.createTextNode("b"));
+  const anchorNode = textEditor._contentEditableDiv.children[0].children[0].childNodes[0];
+  const anchorNodeOffset = 1;
+  const focusNode = anchorNode;
+  const focusNodeOffset = anchorNodeOffset;
+
+  textEditor._setNewTextForTextSelected(sampleSpan, anchorNode, anchorNodeOffset, focusNode, focusNodeOffset);
+  const expectedContent = "<div><span>a</span><span>b</span><span>c</span></div>";
+
+  expect(textEditor._contentEditableDiv.innerHTML,
+    "Content Editable div should contain one section with three characters total").toBe(expectedContent);
+  expect(textEditor._range.startContainer.innerHTML,
+    "Range should start in the first section").toBe(textEditor._contentEditableDiv.children[0].innerHTML);
+  expect(textEditor._range.startOffset,
+    "Range should start after the second character in the section").toBe(2);
+  expect(textEditor._range.collapsed,
+    "Range should be empty").toBe(true);
+})
