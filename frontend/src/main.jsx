@@ -9,7 +9,7 @@ import { getAnalytics } from "firebase/analytics";
 // Your web app's Firebase configuration
 // NOTE: These are public keys and do not need to be stored securely
 const firebaseConfig = {
-  apiKey: "AIzaSyAD8tt7k1dWrfl5Yi-UOfExpbnqF9EoT30",
+  apiKey: import.meta.env.VITE_FIREBASE_WEB_API_KEY,
   authDomain: "velocitype-app.firebaseapp.com",
   projectId: "velocitype-app",
   storageBucket: "velocitype-app.appspot.com",
