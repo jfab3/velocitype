@@ -95,6 +95,7 @@ class TextEditor {
 
     setTextAlignment (alignment) {
         this._contentEditableDiv.style.textAlign = alignment;
+        this._contentEditableDiv.focus();
     }
 
     handleOnBlur () {

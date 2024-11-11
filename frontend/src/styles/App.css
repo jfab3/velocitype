@@ -56,11 +56,29 @@ body {
   outline: none;
   box-shadow: 0px 0px 3px var(--boxShadowColor);
   background-color: var(--secondaryColor);
-
-  /* white-space: pre-wrap; */
-
   white-space-collapse: break-spaces;
   text-wrap: wrap;
+  word-break: break-all;
+}
+
+/* Add Firefox placeholder text, since caret is always left-aligned for empty div */
+@supports ( -moz-appearance:none ) {
+  .content-editable-div:empty {
+    caret-color: transparent;
+  }
+
+  .content-editable-div:empty::before {
+    content: "Start typing here...";
+  }
+
+  .content-editable-div:empty::after {
+    content: "|";
+    opacity: 0;
+  }
+
+  .content-editable-div:focus-within:empty::after {
+    opacity: 1;
+  }
 }
 
 /* BUTTONS */
