@@ -68,7 +68,7 @@ body {
   }
 
   .content-editable-div:empty::before {
-    content: "Start typing here...";
+    content: "Type something...";
   }
 
   .content-editable-div:empty::after {
