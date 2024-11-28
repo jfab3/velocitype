@@ -449,7 +449,7 @@ class TextEditor {
         this._prevRecentSpeed = recentSpeed;
         this._prevAvgSpeed = avgSpeed;
 
-        const computedSpeed = recentNonDecSpeedSmoothed * 0.4 + recentNonDecSpeed * 0.3 + recentSpeed * 0.1 + avgSpeed * 0.2;
+        const computedSpeed = recentNonDecSpeedSmoothed * 0.5 + recentNonDecSpeed * 0.2 + recentSpeed * 0.1 + avgSpeed * 0.2;
         return computedSpeed;
     }
 
