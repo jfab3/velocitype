@@ -6,6 +6,7 @@ class TextEditor {
     SECTION_DIV_LEVEL = "SECTION_DIV";
     CHAR_CONTAINER_LEVEL = "CHAR_CONTAINER";
     TEXT_NODE_LEVEL = "TEXT_NODE";
+    NUM_RECENT_TIME_STAMPS = 20;
 
     constructor (div, docId, user, isLoading) {        
         this._docId = docId;
@@ -29,7 +30,6 @@ class TextEditor {
         
         this._contentEditableDiv.onbeforeinput = this.handleBeforeInput.bind(this);
         this._contentEditableDiv.onblur = this.handleOnBlur.bind(this);
-        // this._contentEditableDiv.onpaste = this.catchPaste.bind(this);
         this._observer = new MutationObserver(mutations => {
             mutations.forEach(mutation => {
                 if (mutation.type === 'childList') {
@@ -40,11 +40,8 @@ class TextEditor {
         this._observer.observe(this._contentEditableDiv, { childList: true, subtree: true });
     
         this._timerId;
-        this._timeElapsed = 1;
-        this._numTextChanges = 0;
-        this._keyPressTimeStamps = [0];
-        this._isTimerRunning = false;
-
+        this._resetSpeedData();
+        
         this._range = document.createRange();
         this._selection = window.getSelection();
 
@@ -58,6 +55,24 @@ class TextEditor {
 
     setIsLoading (isLoading) {
         this._isLoading = isLoading;
+    }
+
+    _resetSpeedData () {
+        this._timeElapsed = 1;
+        this._isTimerRunning = false;
+        this._numTextChanges = 0;
+        this._numTextChanges_NonDecSpeed = 0;
+        this._numKeyPressSkips = [0];
+
+        // [TimeStamp of most recent key press, ..., TimeStamp of first key press within recorded range]
+        this._keyPressTimeStamps = [0];
+        // [Was most recent key press skipped, ..., Was first key press within recorded range skipped]
+        this._keyPressSkips = [false];
+        
+        // Measured in characters per second
+        this._prevImmediateSpeed = 0;
+        this._prevRecentSpeed = 0;
+        this._prevAvgSpeed = 0;
     }
 
     async loadHtmlFromServer () {
@@ -103,18 +118,6 @@ class TextEditor {
         this.stopTimer();
     }
 
-    catchPaste (e) {
-        let clipboardData, pastedData;
-
-        // Stop data from being pasted
-        e.stopPropagation();
-        e.preventDefault();
-
-        // Get pasted data from clipboard API
-        clipboardData = e.clipboardData || window.clipboardData;
-        pastedData = clipboardData.getData('Text');
-    }
-
     handleBeforeInput (e) {
         // Disable pasting, undo, redo and composition text
         const blockedInputTypes = ["insertFromPaste", "historyUndo", "historyRedo", "insertCompositionText"];
@@ -124,16 +127,13 @@ class TextEditor {
             return;
         }
 
-        this._numTextChanges += 1;
-        const speed = this._calculateSpeed();
-        const fontSize = `${speed * 0.75 + 0.5}em`;
         const eventKey = e.data;
-        // not a good way to check, just for the time being...
         if (eventKey !== null) {
             e.stopPropagation();
             e.preventDefault();
-            
-            this._addNewCharacter(eventKey, fontSize)
+            const speed = this._calculateSpeed();
+            const fontSize = this._calculateFontSize(speed);
+            this._addNewCharacter(eventKey, fontSize);
             if (!this._isTimerRunning) {
                 this.startTimer();
             }
@@ -349,7 +349,6 @@ class TextEditor {
         }
 
         const sectionDivNodes = this._contentEditableDiv.children;
-        
         const anchorNodeSectionIdx = [...sectionDivNodes].indexOf(anchorNode.parentNode.parentNode);
         const anchorNodeSection = sectionDivNodes[anchorNodeSectionIdx];
         const anchorNodeCharContainerIdx = [...anchorNodeSection.children].indexOf(anchorNode.parentNode);
@@ -401,23 +400,133 @@ class TextEditor {
         }
     }
 
-    _calculateSpeed () {
-        const numRecentTimeStamps = 20;
+    _updateSpeedData () {
+        this._numTextChanges += 1;
         let lenTimeStampHistory = this._keyPressTimeStamps.unshift(this._timeElapsed);
-        if (lenTimeStampHistory > numRecentTimeStamps) {
+        if (lenTimeStampHistory > this.NUM_RECENT_TIME_STAMPS) {
             this._keyPressTimeStamps.pop();
             lenTimeStampHistory -= 1;
         }
-        const currentSpeed = lenTimeStampHistory / (this._keyPressTimeStamps[0] - this._keyPressTimeStamps[lenTimeStampHistory - 1]);
-        const avgSpeed = this._numTextChanges / this._timeElapsed;
-        return (currentSpeed * 0.8) + (avgSpeed * 0.2);
+        return { lenTimeStampHistory };
+    }
+
+    _updateSpeedDataNonDec (immediateSpeed, recentSpeed, avgSpeed) {
+        const isSpeedDecreasing = this._isSpeedDecreasing(immediateSpeed, recentSpeed, avgSpeed);
+        if (!isSpeedDecreasing) this._numTextChanges_NonDecSpeed += 1;
+        let lenSkipsHistory = this._keyPressSkips.unshift(isSpeedDecreasing);
+        
+        if (lenSkipsHistory > this.NUM_RECENT_TIME_STAMPS) {
+            this._keyPressSkips.pop();
+            this._numKeyPressSkips.pop();
+            lenSkipsHistory -= 1;
+        }
+
+        let numTotalSkips = 0;
+        this._numKeyPressSkips = [];
+        for (const isSkipped of this._keyPressSkips) {
+            numTotalSkips = isSkipped ? numTotalSkips + 1 : numTotalSkips;
+            this._numKeyPressSkips.push(numTotalSkips);
+        }
+        
+        return { lenSkipsHistory };
+    }
+
+    _isSpeedDecreasing (immediateSpeed, recentSpeed, avgSpeed) {
+        return recentSpeed < this._prevRecentSpeed && recentSpeed < 5 && immediateSpeed < avgSpeed;
+    }
+
+    _calculateSpeed () {
+        const { lenTimeStampHistory } = this._updateSpeedData();
+        const immediateSpeed = this._calculateImmediateSpeed();
+        const recentSpeed = this._calculateRecentSpeed(lenTimeStampHistory, this.NUM_RECENT_TIME_STAMPS);
+        const avgSpeed = this._calculateAverageSpeed();
+        
+        const { lenSkipsHistory } = this._updateSpeedDataNonDec(immediateSpeed, recentSpeed, avgSpeed);
+        const recentNonDecSpeed = this._calculateRecentNonDecSpeed(lenSkipsHistory, lenTimeStampHistory, this.NUM_RECENT_TIME_STAMPS);
+        const recentNonDecSpeedSmoothed = this._calculateRecentNonDecSpeedSmoothed(recentNonDecSpeed, lenSkipsHistory, lenTimeStampHistory, this.NUM_RECENT_TIME_STAMPS);
+        
+        this._prevImmediateSpeed = immediateSpeed;
+        this._prevRecentSpeed = recentSpeed;
+        this._prevAvgSpeed = avgSpeed;
+
+        const computedSpeed = recentNonDecSpeedSmoothed * 0.5 + recentNonDecSpeed * 0.2 + recentSpeed * 0.1 + avgSpeed * 0.2;
+        return computedSpeed;
+    }
+
+    _calculateFontSize (speed) {
+        const fontSize = `${speed * 0.7 + 0.3}em`;
+        console.log("Font Size:", fontSize);
+        return fontSize;
+    }
+
+    /**
+     * 
+     * @returns {Number} Speed based on the last 2 keystrokes
+     */
+    _calculateImmediateSpeed () {
+        return 1 / (this._keyPressTimeStamps[0] - this._keyPressTimeStamps[1]);
+    }
+
+    /**
+     * 
+     * @param {Number} lenTimeStampHistory
+     * @param {Number} targetNumKeystrokes 
+     * @returns {Number} Speed based on the last {targetNumKeystrokes} keystrokes
+     */
+    _calculateRecentSpeed (lenTimeStampHistory, targetNumKeystrokes) {
+        const actualNumKeystrokes = Math.min(lenTimeStampHistory, targetNumKeystrokes);
+        return (actualNumKeystrokes - 1) / (this._keyPressTimeStamps[0] - this._keyPressTimeStamps[actualNumKeystrokes - 1]);
+    }
+
+    /**
+     * 
+     * @param {Number} lenSkipsHistory
+     * @param {Number} lenTimeStampHistory
+     * @returns {Number} Speed based on the last {targetNumKeystrokes} keystrokes, ignoring keystrokes while slowing down
+     */
+    _calculateRecentNonDecSpeed (lenSkipsHistory, lenTimeStampHistory, targetNumKeystrokes) {
+        let actualNumKeystrokes = Math.min(lenSkipsHistory, lenTimeStampHistory, targetNumKeystrokes);
+        return (actualNumKeystrokes - this._numKeyPressSkips[actualNumKeystrokes - 1] - 1) / (this._keyPressTimeStamps[0] - this._keyPressTimeStamps[actualNumKeystrokes - 1]);
+    }
+
+    /**
+     * 
+     * @param {Number} recentNonDecSpeed 
+     * @param {Number} lenSkipsHistory 
+     * @param {Number} lenTimeStampHistory 
+     * @param {Number} targetNumKeystrokes 
+     * @returns Smoothed speed based on the last {targetNumKeystrokes} keystrokes, ignoring keystrokes while slowing down
+     */
+    _calculateRecentNonDecSpeedSmoothed (recentNonDecSpeed, lenSkipsHistory, lenTimeStampHistory, targetNumKeystrokes) {
+        let runningTotal = 0;
+        let numSpeedsToAvg = 0;
+        for (let i = 5; i <= targetNumKeystrokes; i++) {
+            runningTotal += this._calculateRecentNonDecSpeed(lenSkipsHistory, lenTimeStampHistory, i);
+            numSpeedsToAvg += 1;
+        }
+        return isFinite(runningTotal) ? runningTotal / numSpeedsToAvg : recentNonDecSpeed;
+    }
+
+    /**
+     * 
+     * @returns {Number} Speed of all keystrokes
+     */
+    _calculateAverageSpeed () {
+        return this._numTextChanges / this._timeElapsed;
+    }
+
+    /**
+     * 
+     * @returns Speed of all keystrokes, ignoring keystrokes while slowing down
+     */
+    _calculateAverageNonDecSpeed () {
+        return this._numTextChanges_NonDecSpeed / this._timeElapsed;
     }
 
     startTimer () {
         this._isTimerRunning = true;
         this._timerId = setInterval(() => {
             this._timeElapsed += .01;
-            //console.log("Time Elapsed: " + this._timeElapsed);
         }, 10);
     }
 
