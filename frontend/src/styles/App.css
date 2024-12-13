@@ -17,8 +17,8 @@ body {
   background: linear-gradient(
     to right,
     var(--secondaryColor-darker), 
-    var(--mainColor-greener) 30%, /* give this part a hint of green/blue */
-    var(--mainColor-greener) 70%, /* give this part a hint of green/blue */
+    var(--mainColor-greener) 30%,
+    var(--mainColor-greener) 70%,
     var(--secondaryColor-darker));
 }
 
@@ -176,9 +176,9 @@ button {
 }
 
 #dev-details-page-container .demo-details-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-evenly;
+  display: grid;
+  grid-gap: 15px;
+  grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
 }
 
 #login-page-container .demo-details-container,
@@ -191,7 +191,7 @@ button {
 }
 
 #about-page-container .demo-text-div {
-  min-height: 150px;
+  margin-bottom: 20px;
 }
 
 .page-h1 {

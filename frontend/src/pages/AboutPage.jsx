@@ -92,6 +92,45 @@ function AboutPage() {
                     <span style={{fontSize: "8.25px"}}>r</span>
                     <span style={{fontSize: "8px"}}>.</span>
                 </div>
+                <div className="demo-text-div">
+                    <span style={{fontSize: "24px"}}>Velocitype is purposefully </span>
+                    <span style={{fontSize: "56px"}}> minimal.</span>
+                    <span style={{fontSize: "48px"}}>.</span>
+                    <span style={{fontSize: "40px"}}>. </span>
+                    <span style={{fontSize: "16px"}}>No copy.</span>
+                    <span style={{fontSize: "20px"}}> No paste.</span>
+                    <span style={{fontSize: "24px"}}> No undo.</span>
+                    <span style={{fontSize: "28px"}}> No redo.</span>
+                </div>
+                <div className="demo-text-div">
+                    <span style={{fontSize: "32px"}}>If</span>
+                    <span style={{fontSize: "40px"}}> you</span>
+                    <span style={{fontSize: "48px"}}> want</span>
+                    <span style={{fontSize: "56px"}}> to</span>
+                    <span style={{fontSize: "64px"}}> s</span>
+                    <span style={{fontSize: "60px"}}>e</span>
+                    <span style={{fontSize: "56px"}}>e </span>
+                    <span style={{fontSize: "48px"}}>s</span>
+                    <span style={{fontSize: "40px"}}>o</span>
+                    <span style={{fontSize: "32px"}}>m</span>
+                    <span style={{fontSize: "34px"}}>e</span>
+                    <span style={{fontSize: "38px"}}>t</span>
+                    <span style={{fontSize: "42px"}}>h</span>
+                    <span style={{fontSize: "50px"}}>i</span>
+                    <span style={{fontSize: "60px"}}>n</span>
+                    <span style={{fontSize: "64px"}}>g,</span>
+                    <span style={{fontSize: "64px"}}> </span>
+                    <span style={{fontSize: "72px"}}>t</span>
+                    <span style={{fontSize: "64px"}}>y</span>
+                    <span style={{fontSize: "60px"}}>p</span>
+                    <span style={{fontSize: "54px"}}>e</span>
+                    <span style={{fontSize: "54px"}}> </span>
+                    <span style={{fontSize: "54px"}}>i</span>
+                    <span style={{fontSize: "54px"}}>t</span>
+                    <span style={{fontSize: "60px"}}>!</span>
+                    <span style={{fontSize: "68px"}}>!</span>
+                    <span style={{fontSize: "76px"}}>!</span>
+                </div>
             </div>
         </div>
         </>
