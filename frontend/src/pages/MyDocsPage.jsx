@@ -29,7 +29,7 @@ function MyDocsPage() {
         const headers = token ? { authtoken: token } : {};
 
         try {
-            await axios.delete(`/api/documents/${doc.docId}/delete`, { headers });
+            await axios.delete(`/api/documents/${doc.docId}`, { headers });
             getMyDocuments();
         } catch (e) {
             console.log("Could not delete document");
@@ -45,7 +45,7 @@ function MyDocsPage() {
         const headers = token ? { authtoken: token } : {};
 
         try {
-            const response = await axios.get('/api/user/documents', { headers });
+            const response = await axios.get('/api/documents', { headers });
             const documents = response.data;
             setIsDocGridEmpty(documents.length == 0);
             if (!documents) {

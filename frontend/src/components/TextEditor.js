@@ -100,7 +100,7 @@ class TextEditor {
         const headers = token ? { authtoken: token } : {};
         const dirtyHtml = this._contentEditableDiv.innerHTML;
         const cleanHtml = sanitizeHtml(dirtyHtml, this._allowedHtml);
-        await axios.put(`/api/documents/${this._docId}/save`, {
+        await axios.put(`/api/documents/${this._docId}`, {
             docId: this._docId,
             html: cleanHtml
         }, { 

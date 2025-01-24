@@ -74,7 +74,7 @@ app.get('/api/documents/:docId', async (req, res) => {
     }
 });
 
-app.get('/api/user/documents', async (req, res) => {
+app.get('/api/documents', async (req, res) => {
     const { uid } = req.user;
 
     if (uid) {
@@ -98,7 +98,7 @@ app.use((req, res, next) => {
     }
 });
 
-app.put('/api/documents/:docId/save', async (req, res) => {
+app.put('/api/documents/:docId', async (req, res) => {
     const { docId } = req.params;
     const { uid } = req.user;
     let { html } = req.body;
@@ -127,11 +127,11 @@ app.put('/api/documents/:docId/save', async (req, res) => {
     res.send(`The document with id ${docId} now has the html ${html}.`);
 });
 
-app.delete('/api/documents/:docId/delete', async (req, res) => {
+app.delete('/api/documents/:docId', async (req, res) => {
     const { docId } = req.params;
     const { uid } = req.user;
 
-    const result = await db.collection('documents').deleteOne({ docId: docId, docOwnerId: uid });
+    await db.collection('documents').deleteOne({ docId: docId, docOwnerId: uid });
     res.send();
 });
 
