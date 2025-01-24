@@ -18,26 +18,26 @@ const NavBar = () => {
             // Sign-out successful.
             navigate('/');
         }).catch((error) => {
-            // An error happened.
+            // An error occurred.
         });
     }
 
     return (
         <header id="navbar">
-            <span ref={titleTextRef} className="title">
+            <h1 ref={titleTextRef} className="title">
                 <Link to="/" className="navbar-link">
-                    <span className="titleLetter">V</span>
-                    <span className="titleLetter">E</span>
-                    <span className="titleLetter">L</span>
-                    <span className="titleLetter">O</span>
-                    <span className="titleLetter">C</span>
-                    <span className="titleLetter">I</span>
-                    <span className="titleLetter">T</span>
-                    <span className="titleLetter">Y</span>
-                    <span className="titleLetter">P</span>
-                    <span className="titleLetter">E</span>
+                    <span className="titleLetter" style={{fontSize: "18px"}}>V</span>
+                    <span className="titleLetter" style={{fontSize: "22px"}}>E</span>
+                    <span className="titleLetter" style={{fontSize: "26px"}}>L</span>
+                    <span className="titleLetter" style={{fontSize: "32px"}}>O</span>
+                    <span className="titleLetter" style={{fontSize: "34px"}}>C</span>
+                    <span className="titleLetter" style={{fontSize: "32px"}}>I</span>
+                    <span className="titleLetter" style={{fontSize: "29px"}}>T</span>
+                    <span className="titleLetter" style={{fontSize: "26px"}}>Y</span>
+                    <span className="titleLetter" style={{fontSize: "22px"}}>P</span>
+                    <span className="titleLetter" style={{fontSize: "18px"}}>E</span>
                 </Link>
-            </span>
+            </h1>
             
             <nav className="page-links-container">
                 <Link to="/" className="navbar-link">Home</Link>
@@ -46,11 +46,9 @@ const NavBar = () => {
                 <Link to="/about" className="navbar-link">About</Link>
             </nav >
 
-            <span className="sign-in-link-container">
                 {user 
                     ? !isLoading && <button className="navbar-button" onClick={logOut}>Sign Out</button>
                     : !isLoading && <button className="navbar-button" onClick={navigateToLogIn}>Sign In</button>}
-            </span>
 
             <DropdownMenu>
                 <Link to="/" id="home-dropdown-item" className="navbar-link">Home</Link>

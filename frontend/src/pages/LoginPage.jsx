@@ -2,10 +2,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getAuth, sendSignInLinkToEmail, isSignInWithEmailLink, signInWithEmailLink, getAdditionalUserInfo } from "firebase/auth";
 import useUser from "../hooks/useUser";
+import { CgSpinner } from "react-icons/cg";
 
 function LoginPage() {
+    const LOGIN_EMAIL_NOT_SENT = "-1";
+    const LOGIN_EMAIL_PENDING = "0";
+    const LOGIN_EMAIL_SENT = "1"
+
     const [email, setEmail] = useState('');
-    const [isLoginEmailSent, setIsLoginEmailSent] = useState(false);
+    const [isLoginEmailSent, setIsLoginEmailSent] = useState(LOGIN_EMAIL_NOT_SENT);
     const [error, setError] = useState('');
     const { user, isLoading } = useUser();
     const navigate = useNavigate();
@@ -18,17 +23,20 @@ function LoginPage() {
         handleCodeInApp: true
     };
 
-    const logIn = () => {
+    const logIn = (e) => {
+        e.preventDefault();
+        setIsLoginEmailSent(LOGIN_EMAIL_PENDING);
+        
         sendSignInLinkToEmail(getAuth(), email, actionCodeSettings).then(() => {
             setError('');
             // The link was successfully sent. Inform the user.
             // Save the email locally so you don't need to ask the user for it again
             // if they open the link on the same device.
             window.localStorage.setItem('emailForSignIn', email);
-            setIsLoginEmailSent(true);
+            setIsLoginEmailSent(LOGIN_EMAIL_SENT);
         }).catch((error) => {
             setError(error.message);
-            setIsLoginEmailSent(false);
+            setIsLoginEmailSent(LOGIN_EMAIL_NOT_SENT);
         });
     }
 
@@ -76,35 +84,43 @@ function LoginPage() {
         <div id="login-page-container">
             {!isLoading && <>
             <h1 className="page-h1">Sign In</h1>
-            <div className="demo-details-container">
+            <section className="demo-details-container">
                 {user &&
                     <>
-                        <div className="success-text">{`Successfully signed in as ${email}`}</div>
+                        <p className="success-text">{`Successfully signed in as ${email}`}</p>
                         <button name="home-button" className="home-button" onClick={navigateToHome}>Home</button>
                     </>
                 }
-                {!user && !isLoginEmailSent &&
+                {!user && (isLoginEmailSent !== LOGIN_EMAIL_SENT) &&
                     <>
-                        <div className="directions-text">Enter your email to receive a sign-in link</div>
-                        <input 
-                            name="email-input"
-                            className="login-input" 
-                            type="Email" 
-                            placeholder="Email address"
-                            value={email}
-                            onChange={e => setEmail(e.target.value)}
-                        />
-                        <button name="continue-button" className="continue-button" onClick={logIn}>Continue</button>
+                        <span className="directions-and-spinner">
+                            <p className="directions-text">Enter your email to receive a sign-in link</p>
+                            {isLoginEmailSent === LOGIN_EMAIL_PENDING &&
+                                <CgSpinner className="icon-spinner"/>
+                            }
+                        </span>
+                        <form onSubmit={logIn}>
+                            <input 
+                                name="email-input"
+                                className="login-input"
+                                type="Email" 
+                                placeholder="Email address"
+                                value={email}
+                                onChange={e => setEmail(e.target.value)}
+                                required
+                            />
+                            <button name="continue-button" className="continue-button" type="submit">Continue</button>
+                        </form>
                     </>
                 }
-                {!user && isLoginEmailSent &&
+                {!user && (isLoginEmailSent === LOGIN_EMAIL_SENT) &&
                     <>
-                        <div className="directions-text">{`Sign-in link has been sent to ${email}`}</div>
+                        <p className="directions-text">{`Sign-in link has been sent to ${email}`}</p>
                         <button name="home-button" className="home-button" onClick={navigateToHome}>Home</button>
                     </>
                 }
-                {error && <div className="error-text">{error}</div>}
-            </div>
+                {error && <p className="error-text">{error}</p>}
+            </section>
             </>}
         </div>
     )

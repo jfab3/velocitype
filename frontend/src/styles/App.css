@@ -140,7 +140,7 @@ button {
   box-shadow: 0px 0px 5px var(--boxShadowColor);
 }
 
-.icon-button {
+.icon-button, .icon-spinner {
   display: flex;
   align-items: center;
   background-color: transparent;
@@ -150,6 +150,20 @@ button {
   padding: 3px;
   margin-right: 5px;
   font-size: 1.25rem;
+}
+
+.icon-spinner {
+  animation: 1s spin linear 0s infinite;
+  color: var(--textColor);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(30deg);
+  }
+  to {
+    transform: rotate(390deg);
+  }
 }
 
 .icon-button:hover {
@@ -181,7 +195,13 @@ button {
   grid-template-columns: repeat(auto-fill, minmax(175px, 1fr));
 }
 
+#about-page-container .demo-details-container {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
 #login-page-container .demo-details-container,
+#login-page-container form,
 #my-docs-page-container .demo-details-container {
   display: flex;
   flex-direction: column;
@@ -262,7 +282,15 @@ button {
   background-color: var(--secondaryColor);
 }
 
+.directions-and-spinner {
+  display: flex;
+  width: 100%;
+  gap: 10px;
+  justify-content: space-between;
+}
+
 .directions-text {
+  margin-top: 0;
   margin-bottom: 10px;
   text-align: left;
 }
@@ -278,13 +306,17 @@ button {
 }
 
 #login-page-container .error-text {
+  margin-bottom: 0;
   margin-top: 15px;
   color: var(--textColor-error);
+  text-align: left;
 }
 
 #login-page-container .success-text {
+  margin-top: 0;
   margin-bottom: 15px;
   color: var(--textColor-success);
+  text-align: left;
 }
 
 /* NAVBAR */
@@ -303,8 +335,7 @@ button {
 }
 
 #navbar .title, 
-#navbar .page-links-container,
-#navbar .sign-in-link-container {
+#navbar .page-links-container {
   display: flex;
   height: 100%;
   align-items: flex-end;
@@ -353,12 +384,6 @@ button {
   text-decoration: underline;
 }
 
-#navbar .sign-in-link-container {
-  justify-content: right;
-  letter-spacing: 2px;
-  overflow: hidden;
-}
-
 #navbar .dropdown {
   position: relative;
   display: none;
@@ -393,7 +418,7 @@ button {
 
 @media only screen and (max-width: 760px) {
   #navbar .page-links-container,
-  #navbar .sign-in-link-container {
+  #navbar .navbar-button {
     display: none;
   }
 
@@ -438,37 +463,4 @@ button {
 #footerbar #created-year {
   justify-self: flex-end;
   margin-right: 20px;
-}
-
-/* TITLE */
-
-#navbar .title span.titleLetter:nth-of-type(1),
-#navbar .title span.titleLetter:nth-of-type(10) {
-  font-size: 18px;
-}
-
-#navbar .title span.titleLetter:nth-of-type(2),
-#navbar .title span.titleLetter:nth-of-type(9) {
-  font-size: 22px;
-}
-
-#navbar .title span.titleLetter:nth-of-type(3),
-#navbar .title span.titleLetter:nth-of-type(8) {
-  font-size: 26px;
-}
-
-#navbar .title span.titleLetter:nth-of-type(4) {
-  font-size: 32px;
-}
-
-#navbar .title span.titleLetter:nth-of-type(5) {
-  font-size: 34px;
-}
-
-#navbar .title span.titleLetter:nth-of-type(6) {
-  font-size: 32px;
-}
-
-#navbar .title span.titleLetter:nth-of-type(7) {
-  font-size: 29px;
 }
