@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from "react-router-dom";
 import useUser from '../hooks/useUser';
 import IconButton from '../components/IconButton';
@@ -9,6 +9,9 @@ import sanitizeHtml from 'sanitize-html';
 function MyDocsPage() {
     const { user, isLoading } = useUser();
     const [myDocuments, setMyDocuments] = useState([]);
+    const [cursorId, setCursorId] = useState(0);
+    const [cursorHasNext, setCursorHasNext] = useState(false);
+    const lastDocObserver = useRef();
     const [isDocGridEmpty, setIsDocGridEmpty] = useState(false);
     const navigate = useNavigate();
 
@@ -30,13 +33,13 @@ function MyDocsPage() {
 
         try {
             await axios.delete(`/api/documents/${doc.docId}`, { headers });
-            getMyDocuments();
+            setMyDocuments((curDocuments) => curDocuments.filter((curDoc) => curDoc.docId !== doc.docId));
         } catch (e) {
             console.log("Could not delete document");
         }
     }
 
-    const getMyDocuments = async () => {
+    const loadInitialDocuments = async () => {
         if (isLoading) {
             return;
         }
@@ -45,13 +48,29 @@ function MyDocsPage() {
         const headers = token ? { authtoken: token } : {};
 
         try {
-            const response = await axios.get('/api/documents', { headers });
-            const documents = response.data;
-            setIsDocGridEmpty(documents.length == 0);
-            if (!documents) {
-                return;
-            }
-            setMyDocuments(documents);
+            const response = await axios.get('/api/documents', { headers, params: { limit: 16 } });
+            setMyDocuments(response.data.documents);
+            setCursorId(response.data.cursorId);
+            setCursorHasNext(response.data.cursorHasNext);
+        } catch {
+            console.log("Could not load documents");
+        }
+    }
+
+    const loadMoreDocuments = async () => {
+        if (isLoading || !cursorHasNext) {
+            return;
+        }
+
+        const token = user && await user.getIdToken();
+        const headers = token ? { authtoken: token } : {};
+
+        try {
+            const response = await axios.get('/api/documents', { headers, params: { limit: 8, cursorId } });
+            const documents = response.data.documents;
+            setMyDocuments(curDocuments => curDocuments.concat(documents));
+            setCursorId(response.data.cursorId);
+            setCursorHasNext(response.data.cursorHasNext);
         } catch {
             console.log("Could not load documents");
         }
@@ -69,16 +88,40 @@ function MyDocsPage() {
     }
 
     useEffect(() => {
-        getMyDocuments();
+        setIsDocGridEmpty(!isLoading && (!myDocuments || myDocuments.length === 0));
+    }, [myDocuments]);
+
+    useEffect(() => {
+        loadInitialDocuments();
     }, [user, isLoading]);
+
+    const lastDocRef = useCallback((node) => {
+        if (!user || isLoading) {
+            return;
+        }
+
+        if (lastDocObserver.current) {
+            lastDocObserver.current.disconnect();
+        }
+
+        lastDocObserver.current = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && cursorHasNext) {
+                loadMoreDocuments();
+            }
+        });
+        
+        if (node) {
+            lastDocObserver.current.observe(node);
+        }
+    }, [cursorId]);
 
     return (
         <div id="my-docs-page-container">
             <h1 className="page-h1">My Documents</h1>
             {user && !isDocGridEmpty &&
                 <div className="documents-grid">
-                {myDocuments && myDocuments.map(doc => (
-                    <div className="document-preview" key={doc.docId}>
+                {myDocuments && myDocuments.map((doc, idx) => (
+                    <div className="document-preview" key={doc.docId} ref={idx === myDocuments.length - 1 ? lastDocRef : null}>
                         <div className="document-preview-toolbar">
                             <IconButton onClick={() => deleteDocument(doc)} Icon={MdDeleteOutline} />
                         </div>

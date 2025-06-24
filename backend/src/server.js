@@ -5,6 +5,7 @@ import express from 'express';
 import sanitizeHtml from 'sanitize-html';
 import 'dotenv/config';
 import { db, connectToDB } from './db.js';
+import { ObjectId } from 'mongodb';
 
 import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
@@ -75,15 +76,25 @@ app.get('/api/documents/:docId', async (req, res) => {
 });
 
 app.get('/api/documents', async (req, res) => {
+    const limit = parseInt(req.query.limit) || 0; 
+    const cursorId = req.query.cursorId;
     const { uid } = req.user;
 
-    if (uid) {
-        const documents = await db.collection('documents').find({ docOwnerId: uid }, {sort: { _id: -1 }}).toArray();
+    let cursor;
+    if (uid && cursorId) {
+        cursor = await db.collection('documents').find({ docOwnerId: uid, _id: { $lt: new ObjectId(cursorId) } }).sort({ _id: -1 }).limit(limit);
+    } else if (uid) {
+        cursor = await db.collection('documents').find({ docOwnerId: uid }).sort({ _id: -1 }).limit(limit);
+    }
+
+    if (cursor) {
+        const cursorHasNext = await cursor.hasNext();
+        const documents = await cursor.toArray();
         for (const document of documents) {
             const cleanHtml = sanitizeHtml(document.html, allowedHtml);
             document.html = cleanHtml;
         }
-        res.json(documents);
+        res.json({ documents, cursorId: documents[documents.length - 1]?._id, cursorHasNext });
     } else {
         res.send();
     }
