@@ -113,7 +113,7 @@ function MyDocsPage() {
         if (node) {
             lastDocObserver.current.observe(node);
         }
-    }, [cursorId]);
+    }, [cursorId, cursorHasNext, user, isLoading]);
 
     return (
         <div id="my-docs-page-container">
